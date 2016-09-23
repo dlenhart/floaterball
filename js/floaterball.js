@@ -61,12 +61,12 @@ var FLTR = {
         FLTR.y_speed*=FLTR.gravity;
         
         //edge collision - X
-        if( FLTR.x + FLTR.x_speed<=0 || FLTR.x + FLTR.x_speed>=FLTR.canvas.width){
+        if ( FLTR.x + FLTR.x_speed<=0 || FLTR.x + FLTR.x_speed>=FLTR.canvas.width){
             FLTR.x_speed=-FLTR.x_speed;
             //console.log(FLTR.canvas.width + " Position: " + FLTR.x);
         }
         //edge collision - Y
-		if( FLTR.y + FLTR.y_speed<0 || FLTR.y + FLTR.y_speed>=FLTR.canvas.height){
+		if ( FLTR.y + FLTR.y_speed<0 || FLTR.y + FLTR.y_speed>=FLTR.canvas.height){
             FLTR.y_speed=-FLTR.y_speed;
             //console.log(FLTR.score);
         }
@@ -89,7 +89,7 @@ var FLTR = {
         FLTR.y+=FLTR.y_speed;
         
         //testing limits
-        if(FLTR.score == 55){
+        if (FLTR.score == 55){
             endGame();
         }
 
@@ -162,21 +162,21 @@ FLTR.text = {
 };
     
 FLTR.checkKeys = {
-    move: function() {
-         if(FLTR.space){
+    move: function () {
+         if (FLTR.space){
              FLTR.y_speed = 0;
              FLTR.x_speed = 0;
          }
-         if(FLTR.left){
+         if (FLTR.left){
              FLTR.x_speed--;
          }
-         if(FLTR.right){
+         if (FLTR.right){
               FLTR.x_speed++;
          }
-         if(FLTR.up){
+         if (FLTR.up){
               FLTR.y_speed--;
          }
-         if(FLTR.down){
+         if (FLTR.down){
               FLTR.y_speed++;
          }
 
@@ -184,9 +184,9 @@ FLTR.checkKeys = {
     }
 };
         
-window.onkeydown = function(event) {
+window.onkeydown = function (event) {
      var key_pressed; 
-     if(event == null){
+     if (event == null){
           key_pressed = window.event.keyCode; 
      }
      else {
@@ -212,9 +212,9 @@ window.onkeydown = function(event) {
      } 
 }
  
-window.onkeyup = function(event) {
+window.onkeyup = function (event) {
      var key_pressed; 
-     if(event == null){
+     if (event == null){
           key_pressed = window.event.keyCode; 
      }
      else {
@@ -240,7 +240,7 @@ window.onkeyup = function(event) {
 }
 
 //pause game function - 8-5-2016
-function pauseGame() {
+function pauseGame () {
     if (!FLTR.gamePaused) {
         game = clearTimeout(game);
         FLTR.gamePaused = true;
@@ -253,13 +253,13 @@ function pauseGame() {
   }
 }
     
-function endGame(){
+function endGame (){
     game = clearTimeout(game);
     //show new screen
     //show score
 }
     
-function startGame(){
+function startGame (){
     //hide start
     document.getElementById('start').style.display = "none";
     //document.getElementById('pauseOverlay').style.display = "none";
