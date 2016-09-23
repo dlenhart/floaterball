@@ -65,8 +65,9 @@ var FLTR = {
             FLTR.x_speed=-FLTR.x_speed;
             //console.log(FLTR.canvas.width + " Position: " + FLTR.x);
         }
+        
         //edge collision - Y
-		if ( FLTR.y + FLTR.y_speed<0 || FLTR.y + FLTR.y_speed>=FLTR.canvas.height){
+        if ( FLTR.y + FLTR.y_speed<0 || FLTR.y + FLTR.y_speed>=FLTR.canvas.height){
             FLTR.y_speed=-FLTR.y_speed;
             //console.log(FLTR.score);
         }
