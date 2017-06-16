@@ -13,18 +13,22 @@ TODO
 
 3.  Obsticles
 
-#Required
+Required
+----
 A browser.
 
-#Install
+Install
+----
 1.  Download code.
 
 2.  Open index.html in browser.
 
-#Website
+Website
+----
 www.snowytech.com
 
-#License
+License
+----
 MIT License
 
 Copyright (c) 2016 Drew D. Lenhart
