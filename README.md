@@ -5,7 +5,8 @@ HTML5 Canvas game.  Navigate floating ball and collect squares.  Arrows to navig
 
 The purpose of this project is to create a game without the aid of any frameworks or game engines and use vanilla Javascript =).
 
-#TODO
+TODO
+----
 1.  Timer
 
 2.  Levels
