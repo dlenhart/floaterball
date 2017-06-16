@@ -25,7 +25,7 @@ Install
 
 Website
 ----
-www.snowytech.com
+https://snowytech.github.io
 
 License
 ----
