@@ -1,4 +1,4 @@
-/* 
+/*
 Title:      Floater Ball
 Author:     Drew D. Lenhart
 Website:    www.snowytech.com/floaterball
@@ -7,9 +7,9 @@ Version:    0.0.6
 
 accomplishment:  fixed start button to remove. need restart.
 
-NEXT:  Now fix circle to box collision! 
+NEXT:  Now fix circle to box collision!
 */
-    
+
 var FLTR = {
     //speed
     x_speed: 0,
@@ -40,6 +40,7 @@ var FLTR = {
     HEIGHT:  400,
     canvas: null,
     ctx:  null,
+    debug: true,
 
     init: function () {
         FLTR.canvas = document.getElementsByTagName('canvas')[0];
@@ -51,7 +52,7 @@ var FLTR = {
 
         FLTR.gameloop();
     },
-    
+
     update: function () {
         //check for keypress and move character.
         FLTR.checkKeys.move();
@@ -59,65 +60,67 @@ var FLTR = {
         //give the appearance of no gravity
         FLTR.x_speed*=FLTR.gravity;
         FLTR.y_speed*=FLTR.gravity;
-        
+
         //edge collision - X
         if ( FLTR.x + FLTR.x_speed<=0 || FLTR.x + FLTR.x_speed>=FLTR.canvas.width){
             FLTR.x_speed=-FLTR.x_speed;
-            //console.log(FLTR.canvas.width + " Position: " + FLTR.x);
+            if (FLTR.debug) console.log(FLTR.canvas.width + " Position: " + FLTR.x);
         }
-        
+
         //edge collision - Y
         if ( FLTR.y + FLTR.y_speed<0 || FLTR.y + FLTR.y_speed>=FLTR.canvas.height){
             FLTR.y_speed=-FLTR.y_speed;
-            //console.log(FLTR.score);
+            if (FLTR.debug) console.log(FLTR.score);
         }
-        
+
         //circle to square collision.
         var squared = (FLTR.r*FLTR.r);
-        if (Math.round(FLTR.x) < FLTR.fx + FLTR.cl 
+        if (Math.round(FLTR.x) < FLTR.fx + FLTR.cl
             && Math.round(FLTR.x) + FLTR.r > FLTR.fx
             && Math.round(FLTR.y) < FLTR.fy + FLTR.cw
             && FLTR.r + Math.round(FLTR.y) > FLTR.fy){
-            
+
             //console.log("collide");
             FLTR.score++;
-            //collided, now randomize new square
+            //randomize new square
             FLTR.squares.random();
         }
 
         //keep last otherwise collision doesnt work
-        FLTR.x+=FLTR.x_speed; 
+        FLTR.x+=FLTR.x_speed;
         FLTR.y+=FLTR.y_speed;
-        
+
         //testing limits
         if (FLTR.score == 55){
             endGame();
+
+            // fire something here
         }
 
     },
-    
+
     draw: function () {
         //draw circle, text, etc here.
         //clear, and redraw circle
         FLTR.character.clear();
         FLTR.character.circle(FLTR.x, FLTR.y, FLTR.r);
-        
-        //draw square food
+
+        //draw squares
         FLTR.squares.food(FLTR.fx, FLTR.fy);
 
         //score text
         FLTR.text.text('Score: ' + FLTR.score, 20, 30, 14, 'green');
-        
-        //timer
-        FLTR.text.text('time: ' + 59, 20, 50, 14, 'green');
+
+        //timer text
+        FLTR.text.text('Time: ' + 59, 20, 50, 14, 'green');
     },
-    
+
     gameloop: function() {
         FLTR.draw();
         FLTR.update();
     }
 };
- 
+
 FLTR.character = {
 
     clear: function () {
@@ -127,7 +130,6 @@ FLTR.character = {
 
     circle: function (x, y, r) {
         FLTR.ctx.beginPath();
-        //color #black
         FLTR.ctx.fillStyle="#ffffff";
         //draw circle, x, y, radius.
         FLTR.ctx.arc(x,y,r,0,Math.PI*2,true);
@@ -135,23 +137,23 @@ FLTR.character = {
         FLTR.ctx.fill();
     }
 };
-    
+
 FLTR.squares = {
-    
+
     random: function () {
         //calculate random x, y position within canvas.
         FLTR.fx = Math.round((FLTR.WIDTH-FLTR.cw)*Math.random());
         FLTR.fy = Math.round((FLTR.HEIGHT-FLTR.cw)*Math.random());
     },
-    
+
     food: function (x, y) {
         //blue square, parameters x, y position
         FLTR.ctx.fillStyle = "#6F7678";
-		FLTR.ctx.fillRect(x, y, FLTR.cl, FLTR.cw);
-		FLTR.ctx.strokeStyle = "white";
+		    FLTR.ctx.fillRect(x, y, FLTR.cl, FLTR.cw);
+		    FLTR.ctx.strokeStyle = "white";
         FLTR.ctx.strokeRect(x, y, FLTR.cl, FLTR.cw);
     }
-    
+
 };
 
 FLTR.text = {
@@ -161,7 +163,7 @@ FLTR.text = {
         FLTR.ctx.fillText(string, x, y);
     }
 };
-    
+
 FLTR.checkKeys = {
     move: function () {
          if (FLTR.space){
@@ -184,14 +186,14 @@ FLTR.checkKeys = {
 
     }
 };
-        
+
 window.onkeydown = function (event) {
-     var key_pressed; 
+     var key_pressed;
      if (event == null){
-          key_pressed = window.event.keyCode; 
+          key_pressed = window.event.keyCode;
      }
      else {
-          key_pressed = event.keyCode; 
+          key_pressed = event.keyCode;
      }
      switch(key_pressed){
           case 16:
@@ -199,10 +201,10 @@ window.onkeydown = function (event) {
                break;
           case 37:
                FLTR.left=true;
-               break; 
+               break;
           case 38:
                FLTR.up=true;
-               break; 
+               break;
           case 39:
                FLTR.right=true;
                break;
@@ -210,16 +212,16 @@ window.onkeydown = function (event) {
                FLTR.down=true;
                break;
 
-     } 
+     }
 }
- 
+
 window.onkeyup = function (event) {
-     var key_pressed; 
+     var key_pressed;
      if (event == null){
-          key_pressed = window.event.keyCode; 
+          key_pressed = window.event.keyCode;
      }
      else {
-          key_pressed = event.keyCode; 
+          key_pressed = event.keyCode;
      }
      switch(key_pressed){
           case 16:
@@ -227,17 +229,17 @@ window.onkeyup = function (event) {
                break;
           case 37:
                FLTR.left=false;
-               break; 
+               break;
           case 38:
                FLTR.up=false;
-               break; 
+               break;
           case 39:
                FLTR.right=false;
                break;
           case 40:
                FLTR.down=false;
                break;
-     } 
+     }
 }
 
 //pause game function - 8-5-2016
@@ -245,7 +247,7 @@ function pauseGame () {
     if (!FLTR.gamePaused) {
         game = clearTimeout(game);
         FLTR.gamePaused = true;
-        console.log("Game paused");
+        if (FLTR.debug) console.log("Game paused");
         document.getElementById('pauseb').innerHTML = 'Resume';
     } else if (FLTR.gamePaused) {
         game = setInterval(FLTR.init,30);
@@ -253,19 +255,19 @@ function pauseGame () {
         document.getElementById('pauseb').innerHTML = 'Pause';
   }
 }
-    
+
 function endGame (){
     game = clearTimeout(game);
     //show new screen
     //show score
 }
-    
+
 function startGame (){
     //hide start
     document.getElementById('start').style.display = "none";
     //document.getElementById('pauseOverlay').style.display = "none";
-    //create random blocks
+    //create initial random blocks
     FLTR.squares.random();
-    //run
+    //run game
     game = setInterval(FLTR.init,30);
 }
