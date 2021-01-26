@@ -1,31 +1,29 @@
 /*
 Title:      Floater Ball
 Author:     Drew D. Lenhart
-Website:    www.snowytech.com/floaterball
-Date:       08/12/16
-Version:    0.0.6
-
-accomplishment:  fixed start button to remove. need restart.
+Website:    https://github.comdlenhart/floaterball
+Date:       01-26-2021
+Version:    0.0.7
 
 NEXT:  Now fix circle to box collision!
 */
 
 var FLTR = {
-    //speed
+    // Speed
     x_speed: 0,
     y_speed: 0,
     gravity: 0.98,
-    //x y position
+    // X & Y position
     y: 300,
     x: 300,
     r: 10,
-    //l&w of rect
+    // Length & Width of rectangle
     cw: 20,
     cl: 20,
     fl: null,
     fx: 0,
     fy: 0,
-    //var for controls
+    // Vars for controls
     left: false,
     right: false,
     up: false,
@@ -35,7 +33,7 @@ var FLTR = {
     //
     gamePaused: false,
     score: 0,
-    //canvas settings
+    // Canvas settings
     WIDTH: 600,
     HEIGHT:  400,
     canvas: null,
