@@ -31,7 +31,11 @@ var FLTR = {
     canvas_height: 400,
     canvas: null,
     ctx: null,
+    time_left: 60,
+    level: 1,
+    total_levels: 60 / 5,
     debug: true,
+    game_ended: false,
 
     init: function () {
         FLTR.canvas = document.getElementsByTagName('canvas')[0];
@@ -43,7 +47,7 @@ var FLTR = {
     },
 
     update: function () {
-        // Keypress check
+        // Key check
         FLTR.checkKeys.move();
 
         // Gravity
@@ -78,10 +82,12 @@ var FLTR = {
         FLTR.y += FLTR.y_speed;
 
         //testing limits
-        if (FLTR.score == 2) {
-            endGame();
-
-            // fire something here
+        if (FLTR.time_left == 0) {
+            FLTR.time_left = 60;
+            FLTR.level = FLTR.level + 1;
+            console.log("Level: " + FLTR.level + " out of: " + FLTR.total_levels);
+        } else {
+            //endGame();
         }
 
     },
@@ -99,7 +105,10 @@ var FLTR = {
         FLTR.text.text('Score: ' + FLTR.score, 20, 30, 14, 'green');
 
         // Timer
-        FLTR.text.text('Time: ' + 59, 20, 50, 14, 'green');
+        FLTR.text.text('Time: ' + FLTR.time_left, 20, 50, 14, 'green');
+
+        // Level
+        FLTR.text.text('Level: ' + FLTR.level, 20, 70, 14, 'green');
     },
 
     gameloop: function () {
@@ -129,7 +138,6 @@ FLTR.squares = {
     },
 
     food: function (x, y) {
-        // Blue food
         FLTR.ctx.fillStyle = "#6F7678";
         FLTR.ctx.fillRect(x, y, FLTR.cl, FLTR.cw);
         FLTR.ctx.strokeStyle = "white";
@@ -164,8 +172,6 @@ FLTR.checkKeys = {
         if (FLTR.down) {
             FLTR.y_speed++;
         }
-
-
     }
 };
 
@@ -192,7 +198,6 @@ window.onkeydown = function (event) {
         case 40:
             FLTR.down = true;
             break;
-
     }
 }
 
@@ -222,6 +227,11 @@ window.onkeyup = function (event) {
     }
 }
 
+function updateTimer() {
+    FLTR.time_left = FLTR.time_left - 1;
+    return FLTR.time_left;
+  }
+
 function pauseGame() {
     if (!FLTR.gamePaused) {
         game = clearTimeout(game);
@@ -237,8 +247,9 @@ function pauseGame() {
 
 function endGame() {
     game = clearTimeout(game);
-    //show new screen
-    //show score
+    timer = clearInterval(timer);
+    document.getElementById('restart').style.display = "block";
+    // make an overlay?
 }
 
 function startGame() {
@@ -246,4 +257,6 @@ function startGame() {
     document.getElementById('start').style.display = "none";
     FLTR.squares.random();
     game = setInterval(FLTR.init, 30);
+    timer = setInterval(updateTimer, 1000);
+    updateTimer();
 }
