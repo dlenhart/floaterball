@@ -5,10 +5,11 @@ Website:    https://github.com/dlenhart/floaterball
 Date:       04-26-2023
 Version:    0.0.8
 
-Description:  Collect as many squares as possible within the time limit.  Use the walls and other objects to your advantage.
+Description:  Collect as many squares as possible within the time 
+limit. Use the walls and other objects to your advantage.
 */
 
-var FLTR = {
+let FLTR = {
     x_speed: 0,
     y_speed: 0,
     gravity: 0.98,
@@ -36,6 +37,8 @@ var FLTR = {
     total_levels: 5,
     debug: true,
     game_ended: false,
+    timer_interval: 1000,
+    frame_rate: 30,
 
     init: function () {
         FLTR.canvas = document.getElementsByTagName('canvas')[0];
@@ -47,32 +50,28 @@ var FLTR = {
     },
 
     update: function () {
-        // Key check
         FLTR.checkKeys.move();
-
-        // Gravity
         FLTR.x_speed *= FLTR.gravity;
         FLTR.y_speed *= FLTR.gravity;
 
-        // X Collision
+        // Edge X Collision
         if (FLTR.x + FLTR.x_speed <= 0 || FLTR.x + FLTR.x_speed >= FLTR.canvas.width) {
             FLTR.x_speed = -FLTR.x_speed;
             if (FLTR.debug) console.log(FLTR.canvas.width + " Position: " + FLTR.x);
         }
 
-        // Y Collision
+        // Edge Y Collision
         if (FLTR.y + FLTR.y_speed < 0 || FLTR.y + FLTR.y_speed >= FLTR.canvas.height) {
             FLTR.y_speed = -FLTR.y_speed;
             if (FLTR.debug) console.log(FLTR.canvas.height + " Position: " + FLTR.y);
         }
 
-        // Collision
+        // Food Collision
         if (Math.round(FLTR.x) < FLTR.food_x_pos + FLTR.cl &&
             Math.round(FLTR.x) + FLTR.r > FLTR.food_x_pos &&
             Math.round(FLTR.y) < FLTR.food_y_pos + FLTR.cw &&
             FLTR.r + Math.round(FLTR.y) > FLTR.food_y_pos
         ) {
-
             if (FLTR.debug) console.log("Food collision");
             FLTR.score++;
             FLTR.squares.random();
@@ -84,7 +83,6 @@ var FLTR = {
         if (FLTR.time_left == 0 && FLTR.level !== FLTR.total_levels) {
             FLTR.time_left = 10;
             FLTR.level = FLTR.level + 1;
-            console.log("Level: " + FLTR.level + " out of: " + FLTR.total_levels);
         } else if (FLTR.level == FLTR.total_levels) {
             endGame();
         }
@@ -103,7 +101,7 @@ var FLTR = {
         FLTR.text.text('Score: ' + FLTR.score, 20, 30, 14, 'green');
 
         // Timer
-        FLTR.text.text('Time: ' + FLTR.time_left, 20, 50, 14, 'green');
+        FLTR.text.text('Time: ' + FLTR.time_left + ' seconds', 20, 50, 14, 'green');
 
         // Level
         FLTR.text.text('Level: ' + FLTR.level, 20, 70, 14, 'green');
@@ -174,12 +172,14 @@ FLTR.checkKeys = {
 };
 
 window.onkeydown = function (event) {
-    var key_pressed;
+    let key_pressed;
+
     if (event == null) {
         key_pressed = window.event.keyCode;
     } else {
         key_pressed = event.keyCode;
     }
+
     switch (key_pressed) {
         case 16:
             FLTR.space = true;
@@ -200,12 +200,14 @@ window.onkeydown = function (event) {
 }
 
 window.onkeyup = function (event) {
-    var key_pressed;
+    let key_pressed;
+
     if (event == null) {
         key_pressed = window.event.keyCode;
     } else {
         key_pressed = event.keyCode;
     }
+
     switch (key_pressed) {
         case 16:
             FLTR.space = false;
@@ -225,36 +227,51 @@ window.onkeyup = function (event) {
     }
 }
 
-function updateTimer() {
+showHideButton = function(id, displayType = "none") {
+    document.getElementById(id).style.display = displayType;
+}
+
+updateButtonText = function(id, text) {
+    document.getElementById(id).innerHTML = text;
+}
+
+updateTimer = function() {
     FLTR.time_left = FLTR.time_left - 1;
     return FLTR.time_left;
   }
 
-function pauseGame() {
+pauseGame = function() {
     if (!FLTR.gamePaused) {
         game = clearTimeout(game);
+        timer = clearTimeout(timer);
         FLTR.gamePaused = true;
-        if (FLTR.debug) console.log("Game paused");
-        document.getElementById('pauseb').innerHTML = 'Resume';
+
+        updateButtonText("pauseb", "Resume");
     } else if (FLTR.gamePaused) {
-        game = setInterval(FLTR.init, 30);
+        game = setInterval(FLTR.init, FLTR.frame_rate);
+        timer = setInterval(updateTimer, FLTR.timer_interval);
         FLTR.gamePaused = false;
-        document.getElementById('pauseb').innerHTML = 'Pause';
+
+        updateButtonText("pauseb", "Pause");
     }
 }
 
-function endGame() {
+endGame = function() {
     game = clearTimeout(game);
     timer = clearInterval(timer);
-    document.getElementById('restart').style.display = "block";
-    // make an overlay?
+    showHideButton("restart", "block");
 }
 
-function startGame() {
-    //hide start
-    document.getElementById('start').style.display = "none";
+resetGame = function() {
+    FLTR.level = 1;
+    FLTR.score = 0;
+    startGame();
+}
+
+startGame = function() {
+    showHideButton("start");
     FLTR.squares.random();
-    game = setInterval(FLTR.init, 30);
-    timer = setInterval(updateTimer, 1000);
+    game = setInterval(FLTR.init, FLTR.frame_rate);
+    timer = setInterval(updateTimer, FLTR.timer_interval);
     updateTimer();
 }
