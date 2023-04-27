@@ -31,9 +31,9 @@ var FLTR = {
     canvas_height: 400,
     canvas: null,
     ctx: null,
-    time_left: 60,
+    time_left: 10,
     level: 1,
-    total_levels: 60 / 5,
+    total_levels: 5,
     debug: true,
     game_ended: false,
 
@@ -81,15 +81,13 @@ var FLTR = {
         FLTR.x += FLTR.x_speed;
         FLTR.y += FLTR.y_speed;
 
-        //testing limits
-        if (FLTR.time_left == 0) {
-            FLTR.time_left = 60;
+        if (FLTR.time_left == 0 && FLTR.level !== FLTR.total_levels) {
+            FLTR.time_left = 10;
             FLTR.level = FLTR.level + 1;
             console.log("Level: " + FLTR.level + " out of: " + FLTR.total_levels);
-        } else {
-            //endGame();
+        } else if (FLTR.level == FLTR.total_levels) {
+            endGame();
         }
-
     },
 
     draw: function () {
