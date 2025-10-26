@@ -2,14 +2,15 @@
 Title:      Floater Ball
 Author:     Drew D. Lenhart
 Website:    https://github.com/dlenhart/floaterball
-Date:       04-26-2023
-Version:    0.0.8
+Date:       11-24-2024
+Version:    0.0.9
 
 Description:  Collect as many squares as possible within the time 
 limit. Use the walls and other objects to your advantage.
 */
 
-let FLTR = {
+let FLTR = 
+{
     x_speed: 0,
     y_speed: 0,
     gravity: 0.98,
@@ -54,56 +55,59 @@ let FLTR = {
         FLTR.x_speed *= FLTR.gravity;
         FLTR.y_speed *= FLTR.gravity;
 
-        // Edge X Collision
-        if (FLTR.x + FLTR.x_speed <= 0 || FLTR.x + FLTR.x_speed >= FLTR.canvas.width) {
-            FLTR.x_speed = -FLTR.x_speed;
-            if (FLTR.debug) console.log(FLTR.canvas.width + " Position: " + FLTR.x);
-        }
-
-        // Edge Y Collision
-        if (FLTR.y + FLTR.y_speed < 0 || FLTR.y + FLTR.y_speed >= FLTR.canvas.height) {
-            FLTR.y_speed = -FLTR.y_speed;
-            if (FLTR.debug) console.log(FLTR.canvas.height + " Position: " + FLTR.y);
-        }
-
-        // Food Collision
-        if (Math.round(FLTR.x) < FLTR.food_x_pos + FLTR.cl &&
-            Math.round(FLTR.x) + FLTR.r > FLTR.food_x_pos &&
-            Math.round(FLTR.y) < FLTR.food_y_pos + FLTR.cw &&
-            FLTR.r + Math.round(FLTR.y) > FLTR.food_y_pos
-        ) {
-            if (FLTR.debug) console.log("Food collision");
-            FLTR.score++;
-            FLTR.squares.random();
-        }
+        FLTR.windowXcollision();
+        FLTR.windowYcollision();
+        FLTR.foodCollision();
 
         FLTR.x += FLTR.x_speed;
         FLTR.y += FLTR.y_speed;
 
+        FLTR.levelCheck();
+    },
+
+    windowXcollision: function () {
+        if (FLTR.x + FLTR.x_speed <= 0 || FLTR.x + FLTR.x_speed >= FLTR.canvas.width) {
+            FLTR.x_speed = -FLTR.x_speed;
+            if (FLTR.debug) console.log(FLTR.canvas.width + " Position: " + FLTR.x);
+        }
+    },
+
+    windowYcollision: function () {
+        if (FLTR.y + FLTR.y_speed < 0 || FLTR.y + FLTR.y_speed >= FLTR.canvas.height) {
+            FLTR.y_speed = -FLTR.y_speed;
+            if (FLTR.debug) console.log(FLTR.canvas.height + " Position: " + FLTR.y);
+        }
+    },
+
+    foodCollision: function () {
+        if (Math.round(FLTR.x) < FLTR.food_x_pos + FLTR.cl &&
+            Math.round(FLTR.x) + FLTR.r > FLTR.food_x_pos &&
+            Math.round(FLTR.y) < FLTR.food_y_pos + FLTR.cw &&
+            FLTR.r + Math.round(FLTR.y) > FLTR.food_y_pos
+        ){
+            if (FLTR.debug) console.log("Food collision");
+            FLTR.score++;
+            FLTR.squares.random();
+        }
+    },
+
+    levelCheck: function () {
         if (FLTR.time_left == 0 && FLTR.level !== FLTR.total_levels) {
             FLTR.time_left = 10;
             FLTR.level = FLTR.level + 1;
         } else if (FLTR.level == FLTR.total_levels) {
             endGame();
         }
+
+        return;
     },
 
     draw: function () {
         FLTR.character.clear();
-
-        // Player
         FLTR.character.circle(FLTR.x, FLTR.y, FLTR.r);
-
-        // Food
         FLTR.squares.food(FLTR.food_x_pos, FLTR.food_y_pos);
-
-        // Score
         FLTR.text.text('Score: ' + FLTR.score, 20, 30, 14, 'green');
-
-        // Timer
         FLTR.text.text('Time: ' + FLTR.time_left + ' seconds', 20, 50, 14, 'green');
-
-        // Level
         FLTR.text.text('Level: ' + FLTR.level, 20, 70, 14, 'green');
     },
 
@@ -139,7 +143,6 @@ FLTR.squares = {
         FLTR.ctx.strokeStyle = "white";
         FLTR.ctx.strokeRect(x, y, FLTR.cl, FLTR.cw);
     }
-
 };
 
 FLTR.text = {
@@ -227,20 +230,20 @@ window.onkeyup = function (event) {
     }
 }
 
-showHideButton = function(id, displayType = "none") {
+showHideButton = function (id, displayType = "none") {
     document.getElementById(id).style.display = displayType;
 }
 
-updateButtonText = function(id, text) {
+updateButtonText = function (id, text) {
     document.getElementById(id).innerHTML = text;
 }
 
-updateTimer = function() {
+updateTimer = function () {
     FLTR.time_left = FLTR.time_left - 1;
     return FLTR.time_left;
-  }
+}
 
-pauseGame = function() {
+pauseGame = function () {
     if (!FLTR.gamePaused) {
         game = clearTimeout(game);
         timer = clearTimeout(timer);
@@ -256,19 +259,19 @@ pauseGame = function() {
     }
 }
 
-endGame = function() {
+endGame = function () {
     game = clearTimeout(game);
     timer = clearInterval(timer);
     showHideButton("restart", "block");
 }
 
-resetGame = function() {
+resetGame = function () {
     FLTR.level = 1;
     FLTR.score = 0;
     startGame();
 }
 
-startGame = function() {
+startGame = function () {
     showHideButton("start");
     FLTR.squares.random();
     game = setInterval(FLTR.init, FLTR.frame_rate);
