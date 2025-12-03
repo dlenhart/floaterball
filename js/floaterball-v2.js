@@ -3,12 +3,11 @@ Title:      Floater Ball
 Author:     Drew D. Lenhart
 Website:    https://github.com/dlenhart/floaterball
 Date:       12-03-2025
-Version:    0.2.2
+Version:    0.2.3
 
 Description:  Collect as many squares as possible within the time 
 limit. Use the walls and other objects to your advantage.
 */
-
 
 let game = null;
 let timer = null;
@@ -29,6 +28,10 @@ let FLTR = {
     FOOD_HEIGHT: 20,
     FOOD_COLOR: "#6F7678",
     FOOD_STROKE_COLOR: "white",
+    BONUS_FOOD_COLOR: "#9B59B6",
+    BONUS_FOOD_POINTS: 10,
+    POWERUP_FOOD_COLOR: "#FF8C00",
+    POWERUP_SIZE_MULTIPLIER: 2,
     OBSTACLE_BASE_SIZE: 20,
     OBSTACLE_MAX_MULTIPLIER: 4,
     OBSTACLE_COLOR: "#000000",
@@ -43,13 +46,22 @@ let FLTR = {
     KEY_UP: "ArrowUp",
     KEY_RIGHT: "ArrowRight",
     KEY_DOWN: "ArrowDown",
-
     xSpeed: 0,
     ySpeed: 0,
     y: 300,
     x: 300,
     foodXPos: 0,
     foodYPos: 0,
+    bonusFoodXPos: -100,
+    bonusFoodYPos: -100,
+    bonusFoodActive: false,
+    powerupFoodXPos: -100,
+    powerupFoodYPos: -100,
+    powerupFoodActive: false,
+    powerupActive: false,
+    currentBallRadius: 10,
+    trail: [],
+    maxTrailLength: 15,
     obstacles: [],
     left: false,
     right: false,
@@ -72,15 +84,12 @@ let FLTR = {
     init: function () {
         try {
             FLTR.canvas = document.getElementsByTagName('canvas')[0];
-
             if (!FLTR.canvas) {
                 throw new Error('Canvas element not found');
             }
-
             FLTR.canvas.width = FLTR.CANVAS_WIDTH;
             FLTR.canvas.height = FLTR.CANVAS_HEIGHT;
             FLTR.ctx = FLTR.canvas.getContext('2d');
-
             if (!FLTR.ctx) {
                 throw new Error('Could not get 2D context from canvas');
             }
@@ -90,8 +99,6 @@ let FLTR = {
         }
     },
 
-    // Calculate time for current level
-    // Level 1: 30s, Level 2-4: 29s, Level 5-7: 28s
     getLevelTime: function (level) {
         return Math.max(5, FLTR.INITIAL_TIME - Math.floor((level - 1) / 3));
     },
@@ -106,47 +113,30 @@ let FLTR = {
     },
 
     ballOverlapsRectangle: function (ballX, ballY, ballRadius, rectX, rectY, rectW, rectH) {
-        // Find the closest point on the rectangle to the ball's center
         const closestX = Math.max(rectX, Math.min(ballX, rectX + rectW));
         const closestY = Math.max(rectY, Math.min(ballY, rectY + rectH));
         const distanceX = ballX - closestX;
         const distanceY = ballY - closestY;
         const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-
         return distanceSquared < (ballRadius * ballRadius);
     },
 
     generateObstacles: function () {
         FLTR.obstacles = [];
         const obstacleCount = FLTR.getObstacleCount(FLTR.level);
-
         for (let i = 0; i < obstacleCount; i++) {
             let validPosition = false;
             let attempts = 0;
             let obstacle;
-
             while (!validPosition && attempts < 100) {
                 const isHorizontal = Math.random() < 0.5;
                 const sizeMultiplier = 1 + Math.random() * (FLTR.OBSTACLE_MAX_MULTIPLIER - 1);
-
-                const width = isHorizontal ?
-                    FLTR.OBSTACLE_BASE_SIZE * sizeMultiplier :
-                    FLTR.OBSTACLE_BASE_SIZE;
-                const height = isHorizontal ?
-                    FLTR.OBSTACLE_BASE_SIZE :
-                    FLTR.OBSTACLE_BASE_SIZE * sizeMultiplier;
-
+                const width = isHorizontal ? FLTR.OBSTACLE_BASE_SIZE * sizeMultiplier : FLTR.OBSTACLE_BASE_SIZE;
+                const height = isHorizontal ? FLTR.OBSTACLE_BASE_SIZE : FLTR.OBSTACLE_BASE_SIZE * sizeMultiplier;
                 const x = Math.round((FLTR.CANVAS_WIDTH - width) * Math.random());
                 const y = Math.round(FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - height) * Math.random());
-
-                obstacle = {
-                    x,
-                    y,
-                    width,
-                    height
-                };
+                obstacle = {x, y, width, height};
                 validPosition = true;
-
                 for (let j = 0; j < FLTR.obstacles.length; j++) {
                     const existing = FLTR.obstacles[j];
                     if (FLTR.rectanglesOverlap(x, y, width, height, existing.x, existing.y, existing.width, existing.height)) {
@@ -154,21 +144,14 @@ let FLTR = {
                         break;
                     }
                 }
-
                 if (validPosition && FLTR.ballOverlapsRectangle(FLTR.x, FLTR.y, FLTR.BALL_RADIUS, x, y, width, height)) {
                     validPosition = false;
                 }
-
-                if (validPosition && FLTR.rectanglesOverlap(
-                        FLTR.foodXPos, FLTR.foodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT,
-                        x, y, width, height
-                    )) {
+                if (validPosition && FLTR.rectanglesOverlap(FLTR.foodXPos, FLTR.foodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, x, y, width, height)) {
                     validPosition = false;
                 }
-
                 attempts++;
             }
-
             if (validPosition) {
                 FLTR.obstacles.push(obstacle);
             }
@@ -178,22 +161,18 @@ let FLTR = {
     obstacleCollision: function () {
         for (let i = 0; i < FLTR.obstacles.length; i++) {
             const obs = FLTR.obstacles[i];
-
-            if (FLTR.ballOverlapsRectangle(FLTR.x, FLTR.y, FLTR.BALL_RADIUS, obs.x, obs.y, obs.width, obs.height)) {
+            if (FLTR.ballOverlapsRectangle(FLTR.x, FLTR.y, FLTR.currentBallRadius, obs.x, obs.y, obs.width, obs.height)) {
                 FLTR.xSpeed = -FLTR.xSpeed * 0.8;
                 FLTR.ySpeed = -FLTR.ySpeed * 0.8;
-
                 const centerX = obs.x + obs.width / 2;
                 const centerY = obs.y + obs.height / 2;
                 const dx = FLTR.x - centerX;
                 const dy = FLTR.y - centerY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-
                 if (distance > 0) {
                     FLTR.x += (dx / distance) * 2;
                     FLTR.y += (dy / distance) * 2;
                 }
-
                 if (FLTR.debug) console.log("Obstacle collision");
                 break;
             }
@@ -205,15 +184,18 @@ let FLTR = {
             FLTR.checkKeys.move();
             FLTR.xSpeed *= FLTR.DAMPING;
             FLTR.ySpeed *= FLTR.DAMPING;
-
             FLTR.windowXCollision();
             FLTR.windowYCollision();
             FLTR.obstacleCollision();
             FLTR.foodCollision();
-
+            FLTR.bonusFoodCollision();
+            FLTR.powerupFoodCollision();
             FLTR.x += FLTR.xSpeed;
             FLTR.y += FLTR.ySpeed;
-
+            FLTR.trail.push({x: FLTR.x, y: FLTR.y});
+            if (FLTR.trail.length > FLTR.maxTrailLength) {
+                FLTR.trail.shift();
+            }
             FLTR.levelCheck();
         } catch (error) {
             console.error('Update error:', error.message);
@@ -222,9 +204,7 @@ let FLTR = {
 
     windowXCollision: function () {
         if (!FLTR.canvas) return;
-
-        if (FLTR.x + FLTR.xSpeed - FLTR.BALL_RADIUS <= 0 ||
-            FLTR.x + FLTR.xSpeed + FLTR.BALL_RADIUS >= FLTR.canvas.width) {
+        if (FLTR.x + FLTR.xSpeed - FLTR.currentBallRadius <= 0 || FLTR.x + FLTR.xSpeed + FLTR.currentBallRadius >= FLTR.canvas.width) {
             FLTR.xSpeed = -FLTR.xSpeed;
             if (FLTR.debug) console.log(FLTR.canvas.width + " Position: " + FLTR.x);
         }
@@ -232,36 +212,56 @@ let FLTR = {
 
     windowYCollision: function () {
         if (!FLTR.canvas) return;
-
-        // Check collision, account for header bar
-        if (FLTR.y + FLTR.ySpeed - FLTR.BALL_RADIUS < FLTR.HEADER_HEIGHT ||
-            FLTR.y + FLTR.ySpeed + FLTR.BALL_RADIUS >= FLTR.canvas.height) {
+        if (FLTR.y + FLTR.ySpeed - FLTR.currentBallRadius < FLTR.HEADER_HEIGHT || FLTR.y + FLTR.ySpeed + FLTR.currentBallRadius >= FLTR.canvas.height) {
             FLTR.ySpeed = -FLTR.ySpeed;
             if (FLTR.debug) console.log(FLTR.canvas.height + " Position: " + FLTR.y);
         }
     },
 
     foodCollision: function () {
-        if (Math.round(FLTR.x) + FLTR.BALL_RADIUS > FLTR.foodXPos &&
-            Math.round(FLTR.x) - FLTR.BALL_RADIUS < FLTR.foodXPos + FLTR.FOOD_WIDTH &&
-            Math.round(FLTR.y) + FLTR.BALL_RADIUS > FLTR.foodYPos &&
-            Math.round(FLTR.y) - FLTR.BALL_RADIUS < FLTR.foodYPos + FLTR.FOOD_HEIGHT
-        ) {
+        if (Math.round(FLTR.x) + FLTR.currentBallRadius > FLTR.foodXPos && Math.round(FLTR.x) - FLTR.currentBallRadius < FLTR.foodXPos + FLTR.FOOD_WIDTH &&
+            Math.round(FLTR.y) + FLTR.currentBallRadius > FLTR.foodYPos && Math.round(FLTR.y) - FLTR.currentBallRadius < FLTR.foodYPos + FLTR.FOOD_HEIGHT) {
             if (FLTR.debug) console.log("Food collision");
             FLTR.score++;
             FLTR.levelScoreCount++;
             FLTR.squares.random();
+            if (FLTR.levelScoreCount >= 10 && !FLTR.powerupFoodActive && FLTR.level >= 2) {
+                FLTR.squares.powerup();
+            }
+        }
+    },
+
+    bonusFoodCollision: function () {
+        if (!FLTR.bonusFoodActive) return;
+        if (Math.round(FLTR.x) + FLTR.currentBallRadius > FLTR.bonusFoodXPos && Math.round(FLTR.x) - FLTR.currentBallRadius < FLTR.bonusFoodXPos + FLTR.FOOD_WIDTH &&
+            Math.round(FLTR.y) + FLTR.currentBallRadius > FLTR.bonusFoodYPos && Math.round(FLTR.y) - FLTR.currentBallRadius < FLTR.bonusFoodYPos + FLTR.FOOD_HEIGHT) {
+            if (FLTR.debug) console.log("Bonus food collision");
+            FLTR.score += FLTR.BONUS_FOOD_POINTS;
+            FLTR.bonusFoodActive = false;
+            FLTR.bonusFoodXPos = -100;
+            FLTR.bonusFoodYPos = -100;
+        }
+    },
+
+    powerupFoodCollision: function () {
+        if (!FLTR.powerupFoodActive) return;
+        if (Math.round(FLTR.x) + FLTR.currentBallRadius > FLTR.powerupFoodXPos && Math.round(FLTR.x) - FLTR.currentBallRadius < FLTR.powerupFoodXPos + FLTR.FOOD_WIDTH &&
+            Math.round(FLTR.y) + FLTR.currentBallRadius > FLTR.powerupFoodYPos && Math.round(FLTR.y) - FLTR.currentBallRadius < FLTR.powerupFoodYPos + FLTR.FOOD_HEIGHT) {
+            if (FLTR.debug) console.log("Powerup food collision");
+            FLTR.powerupActive = true;
+            FLTR.currentBallRadius = FLTR.BALL_RADIUS * FLTR.POWERUP_SIZE_MULTIPLIER;
+            FLTR.powerupFoodActive = false;
+            FLTR.powerupFoodXPos = -100;
+            FLTR.powerupFoodYPos = -100;
         }
     },
 
     levelCheck: function () {
         if (FLTR.timeLeft == 0 && FLTR.level !== FLTR.TOTAL_LEVELS) {
-            // End game if a player hasn't collected in level
             if (FLTR.levelScoreCount == 0) {
                 endGame();
                 return;
             }
-
             if (!FLTR.levelTransition) {
                 FLTR.levelTransition = true;
                 FLTR.gamePaused = true;
@@ -272,7 +272,6 @@ let FLTR = {
         } else if (FLTR.level == FLTR.TOTAL_LEVELS && FLTR.timeLeft == 0) {
             endGame();
         }
-
         return;
     },
 
@@ -282,8 +281,19 @@ let FLTR = {
             FLTR.level = FLTR.level + 1;
             FLTR.timeLeft = FLTR.getLevelTime(FLTR.level);
             FLTR.levelScoreCount = 0;
+            FLTR.powerupActive = false;
+            FLTR.currentBallRadius = FLTR.BALL_RADIUS;
+            FLTR.powerupFoodActive = false;
+            FLTR.powerupFoodXPos = -100;
+            FLTR.powerupFoodYPos = -100;
+            FLTR.bonusFoodActive = false;
+            FLTR.bonusFoodXPos = -100;
+            FLTR.bonusFoodYPos = -100;
             FLTR.generateObstacles();
             FLTR.squares.random();
+            if (FLTR.level >= 3 && FLTR.level <= 20) {
+                FLTR.squares.bonus();
+            }
             FLTR.gamePaused = false;
             game = requestAnimationFrame(FLTR.gameloop);
             timer = setInterval(updateTimer, FLTR.TIMER_INTERVAL);
@@ -293,41 +303,36 @@ let FLTR = {
     draw: function () {
         try {
             FLTR.character.clear();
-
-            // black header bar
             FLTR.ctx.fillStyle = '#000000';
             FLTR.ctx.fillRect(0, 0, FLTR.CANVAS_WIDTH, 20);
-
             FLTR.obstacles.forEach(obs => {
                 FLTR.squares.obstacle(obs.x, obs.y, obs.width, obs.height);
             });
-            FLTR.character.circle(FLTR.x, FLTR.y, FLTR.BALL_RADIUS);
+            FLTR.character.trail();
+            FLTR.character.circle(FLTR.x, FLTR.y, FLTR.currentBallRadius);
             FLTR.squares.food(FLTR.foodXPos, FLTR.foodYPos);
-
-            // text on black bar
+            if (FLTR.bonusFoodActive) {
+                FLTR.squares.bonusFood(FLTR.bonusFoodXPos, FLTR.bonusFoodYPos);
+            }
+            if (FLTR.powerupFoodActive) {
+                FLTR.squares.powerupFood(FLTR.powerupFoodXPos, FLTR.powerupFoodYPos);
+            }
             FLTR.text.text('Score: ' + FLTR.score + '  Level: ' + FLTR.level, 5, 14, 14, 'white');
             FLTR.text.rightAlignedText('Time: ' + FLTR.timeLeft + 's', FLTR.CANVAS_WIDTH - 5, 14, 14, 'white');
-
-            // paused overlay
             if (FLTR.gamePaused && !FLTR.levelTransition && !FLTR.gameEnded) {
                 const centerX = FLTR.CANVAS_WIDTH / 2;
                 const centerY = FLTR.CANVAS_HEIGHT / 2;
                 FLTR.text.centeredText('Paused', centerX, centerY, 24, FLTR.TEXT_COLOR);
             }
-
-            // level transition 
             if (FLTR.levelTransition) {
                 const centerX = FLTR.CANVAS_WIDTH / 2;
                 const centerY = FLTR.CANVAS_HEIGHT / 2;
-
                 FLTR.text.centeredText('Level Complete!', centerX, centerY - 20, 24, FLTR.TEXT_COLOR);
                 FLTR.text.centeredText('Press spacebar to continue...', centerX, centerY + 20, 18, FLTR.TEXT_COLOR);
             }
-
             if (FLTR.gameEnded) {
                 const centerX = FLTR.CANVAS_WIDTH / 2;
                 const centerY = FLTR.CANVAS_HEIGHT / 2;
-
                 FLTR.text.centeredText('Game Over', centerX, centerY - 20, 24, FLTR.TEXT_COLOR);
                 FLTR.text.centeredText('Your score was: ' + FLTR.score, centerX, centerY + 20, 16, FLTR.TEXT_COLOR);
             }
@@ -358,7 +363,19 @@ FLTR.character = {
             FLTR.ctx.clearRect(0, 0, FLTR.CANVAS_WIDTH, FLTR.CANVAS_HEIGHT);
         }
     },
-
+    trail: function () {
+        if (FLTR.ctx && FLTR.trail.length > 1) {
+            for (let i = 0; i < FLTR.trail.length; i++) {
+                const alpha = (i / FLTR.trail.length) * 0.5;
+                const size = (i / FLTR.trail.length) * FLTR.currentBallRadius;
+                FLTR.ctx.beginPath();
+                FLTR.ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                FLTR.ctx.arc(FLTR.trail[i].x, FLTR.trail[i].y, size, 0, Math.PI * 2, true);
+                FLTR.ctx.closePath();
+                FLTR.ctx.fill();
+            }
+        }
+    },
     circle: function (x, y, r) {
         if (FLTR.ctx) {
             FLTR.ctx.beginPath();
@@ -374,28 +391,70 @@ FLTR.squares = {
     random: function () {
         let validPosition = false;
         let attempts = 0;
-
         while (!validPosition && attempts < 100) {
             FLTR.foodXPos = Math.round((FLTR.CANVAS_WIDTH - FLTR.FOOD_WIDTH) * Math.random());
             FLTR.foodYPos = Math.round(FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - FLTR.FOOD_HEIGHT) * Math.random());
-
             validPosition = true;
-
             for (let i = 0; i < FLTR.obstacles.length; i++) {
                 const obs = FLTR.obstacles[i];
-                if (FLTR.rectanglesOverlap(
-                        FLTR.foodXPos, FLTR.foodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT,
-                        obs.x, obs.y, obs.width, obs.height
-                    )) {
+                if (FLTR.rectanglesOverlap(FLTR.foodXPos, FLTR.foodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, obs.x, obs.y, obs.width, obs.height)) {
                     validPosition = false;
                     break;
                 }
             }
-
             attempts++;
         }
     },
-
+    bonus: function () {
+        let validPosition = false;
+        let attempts = 0;
+        while (!validPosition && attempts < 100) {
+            FLTR.bonusFoodXPos = Math.round((FLTR.CANVAS_WIDTH - FLTR.FOOD_WIDTH) * Math.random());
+            FLTR.bonusFoodYPos = Math.round(FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - FLTR.FOOD_HEIGHT) * Math.random());
+            validPosition = true;
+            for (let i = 0; i < FLTR.obstacles.length; i++) {
+                const obs = FLTR.obstacles[i];
+                if (FLTR.rectanglesOverlap(FLTR.bonusFoodXPos, FLTR.bonusFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, obs.x, obs.y, obs.width, obs.height)) {
+                    validPosition = false;
+                    break;
+                }
+            }
+            if (validPosition && FLTR.rectanglesOverlap(FLTR.bonusFoodXPos, FLTR.bonusFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, FLTR.foodXPos, FLTR.foodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT)) {
+                validPosition = false;
+            }
+            attempts++;
+        }
+        if (validPosition) {
+            FLTR.bonusFoodActive = true;
+        }
+    },
+    powerup: function () {
+        if (Math.random() > 0.2) return;
+        let validPosition = false;
+        let attempts = 0;
+        while (!validPosition && attempts < 100) {
+            FLTR.powerupFoodXPos = Math.round((FLTR.CANVAS_WIDTH - FLTR.FOOD_WIDTH) * Math.random());
+            FLTR.powerupFoodYPos = Math.round(FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - FLTR.FOOD_HEIGHT) * Math.random());
+            validPosition = true;
+            for (let i = 0; i < FLTR.obstacles.length; i++) {
+                const obs = FLTR.obstacles[i];
+                if (FLTR.rectanglesOverlap(FLTR.powerupFoodXPos, FLTR.powerupFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, obs.x, obs.y, obs.width, obs.height)) {
+                    validPosition = false;
+                    break;
+                }
+            }
+            if (validPosition && FLTR.rectanglesOverlap(FLTR.powerupFoodXPos, FLTR.powerupFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, FLTR.foodXPos, FLTR.foodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT)) {
+                validPosition = false;
+            }
+            if (validPosition && FLTR.bonusFoodActive && FLTR.rectanglesOverlap(FLTR.powerupFoodXPos, FLTR.powerupFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, FLTR.bonusFoodXPos, FLTR.bonusFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT)) {
+                validPosition = false;
+            }
+            attempts++;
+        }
+        if (validPosition) {
+            FLTR.powerupFoodActive = true;
+        }
+    },
     food: function (x, y) {
         if (FLTR.ctx) {
             FLTR.ctx.fillStyle = FLTR.FOOD_COLOR;
@@ -404,7 +463,22 @@ FLTR.squares = {
             FLTR.ctx.strokeRect(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT);
         }
     },
-
+    bonusFood: function (x, y) {
+        if (FLTR.ctx) {
+            FLTR.ctx.fillStyle = FLTR.BONUS_FOOD_COLOR;
+            FLTR.ctx.fillRect(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT);
+            FLTR.ctx.strokeStyle = FLTR.FOOD_STROKE_COLOR;
+            FLTR.ctx.strokeRect(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT);
+        }
+    },
+    powerupFood: function (x, y) {
+        if (FLTR.ctx) {
+            FLTR.ctx.fillStyle = FLTR.POWERUP_FOOD_COLOR;
+            FLTR.ctx.fillRect(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT);
+            FLTR.ctx.strokeStyle = FLTR.FOOD_STROKE_COLOR;
+            FLTR.ctx.strokeRect(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT);
+        }
+    },
     obstacle: function (x, y, width, height) {
         if (FLTR.ctx) {
             FLTR.ctx.fillStyle = FLTR.OBSTACLE_COLOR;
@@ -425,7 +499,6 @@ FLTR.text = {
             FLTR.ctx.fillText(string, x, y);
         }
     },
-
     rightAlignedText: function (string, x, y, size, col) {
         if (FLTR.ctx) {
             FLTR.ctx.font = 'bold ' + size + 'px ' + FLTR.TEXT_FONT;
@@ -435,7 +508,6 @@ FLTR.text = {
             FLTR.ctx.textAlign = 'left';
         }
     },
-
     centeredText: function (string, x, y, size, col) {
         if (FLTR.ctx) {
             FLTR.ctx.font = 'bold ' + size + 'px ' + FLTR.TEXT_FONT;
@@ -472,7 +544,6 @@ FLTR.checkKeys = {
 
 window.onkeydown = function (event) {
     const keyPressed = event.key;
-
     switch (keyPressed) {
         case FLTR.KEY_SPACE:
             if (FLTR.levelTransition) {
