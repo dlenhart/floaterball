@@ -18,7 +18,7 @@ let FLTR = {
     INITIAL_TIME: 30,
     TIMER_INTERVAL: 1000,
     INITIAL_LEVEL: 1,
-    TOTAL_LEVELS: 30,
+    TOTAL_LEVELS: 50,
     CANVAS_WIDTH: 600,
     CANVAS_HEIGHT: 400,
     HEADER_HEIGHT: 20,
@@ -284,7 +284,7 @@ let FLTR = {
         }
     },
 
-levelCheck: function () {
+    levelCheck: function () {
         if (FLTR.timeLeft <= 0 && FLTR.level !== FLTR.TOTAL_LEVELS) {
             if (FLTR.levelScoreCount == 0) {
                 endGame();
@@ -307,6 +307,7 @@ levelCheck: function () {
                 FLTR.powerupFoodXPos = -100;
                 FLTR.powerupFoodYPos = -100;
 
+                showHideButton("pauseb", "none");
                 FLTR.draw();
             }
         } else if (FLTR.level == FLTR.TOTAL_LEVELS && FLTR.timeLeft <= 0) {
@@ -331,12 +332,20 @@ levelCheck: function () {
             FLTR.bonusFoodYPos = -100;
             FLTR.generateObstacles();
             FLTR.squares.random();
-            if (FLTR.level >= 3 && FLTR.level <= 20) {
-                FLTR.squares.bonus();
+
+            if (FLTR.level >= 2) {
+                setTimeout(function () {
+                    if (!FLTR.gameEnded && FLTR.level >= 2) {
+                        FLTR.squares.bonus();
+                    }
+                }, 5000);
             }
+
+            showHideButton("pauseb", "block");
+
             FLTR.gamePaused = false;
             game = requestAnimationFrame(FLTR.gameloop);
-            
+
             if (timer) {
                 clearInterval(timer);
                 timer = null;
@@ -709,6 +718,7 @@ endGame = function () {
         clearInterval(timer);
         timer = null;
         FLTR.gameEnded = true;
+        showHideButton("pauseb", "none");
         showHideButton("restart", "block");
     } catch (error) {
         console.error('endGame error:', error.message);
@@ -727,6 +737,10 @@ resetGame = function () {
         FLTR.ySpeed = 0;
         FLTR.x = 300;
         FLTR.y = 300;
+        FLTR.bonusFoodActive = false;
+        FLTR.bonusFoodXPos = -100;
+        FLTR.bonusFoodYPos = -100;
+
         startGame();
     } catch (error) {
         console.error('resetGame error:', error.message);
@@ -741,7 +755,7 @@ startGame = function () {
 
         showHideButton("start");
         showHideButton("restart");
-        // ✨ BUGFIX #2: Create pause button if it doesn't exist
+
         if (!document.getElementById("pauseb")) {
             const pauseBtn = document.createElement("button");
             pauseBtn.id = "pauseb";
@@ -752,9 +766,18 @@ startGame = function () {
             container.appendChild(pauseBtn);
         }
         showHideButton("pauseb", "block");
-        
+
         FLTR.generateObstacles();
         FLTR.squares.random();
+
+        if (FLTR.level >= 2) {
+            setTimeout(function () {
+                if (!FLTR.gameEnded && FLTR.level >= 2) {
+                    FLTR.squares.bonus();
+                }
+            }, 5000);
+        }
+
         game = requestAnimationFrame(FLTR.gameloop);
 
         if (timer) {
@@ -769,7 +792,7 @@ startGame = function () {
 }
 
 // Auto-pause when user switches tabs
-document.addEventListener('visibilitychange', function() {
+document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
         // User switched away - pause if game is active
         if (!FLTR.gamePaused && !FLTR.gameEnded && !FLTR.levelTransition && timer) {
@@ -784,7 +807,7 @@ document.addEventListener('visibilitychange', function() {
 });
 
 // Auto-pause when user clicks outside of the window
-window.addEventListener('blur', function() {
+window.addEventListener('blur', function () {
     if (!FLTR.gamePaused && !FLTR.gameEnded && !FLTR.levelTransition && timer) {
         clearInterval(timer);
         timer = null;
