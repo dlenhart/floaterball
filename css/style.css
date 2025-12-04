@@ -1,5 +1,5 @@
 /*
-FloaterBall - snowytech - Drew D. Lenhart
+FloaterBall - SnowyWorks - Drew D. Lenhart
 */
 body {
     margin: 0;
@@ -16,7 +16,7 @@ canvas {
     background: #fff;
     border: 3px solid green;
     border-radius: 3px;
-    background-image: url(../images/testback.png);
+    background-image: url(../images/background.png);
 
 }
 

@@ -468,7 +468,16 @@ FLTR.squares = {
             validPosition = true;
             for (let i = 0; i < FLTR.obstacles.length; i++) {
                 const obs = FLTR.obstacles[i];
-                if (FLTR.rectanglesOverlap(FLTR.bonusFoodXPos, FLTR.bonusFoodYPos, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, obs.x, obs.y, obs.width, obs.height)) {
+                if (FLTR.rectanglesOverlap(
+                    FLTR.bonusFoodXPos, 
+                    FLTR.bonusFoodYPos, 
+                    FLTR.FOOD_WIDTH, 
+                    FLTR.FOOD_HEIGHT, 
+                    obs.x, 
+                    obs.y, 
+                    obs.width, 
+                    obs.height
+                )) {
                     validPosition = false;
                     break;
                 }
