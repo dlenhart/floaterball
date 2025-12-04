@@ -3,7 +3,7 @@ Title:      Floater Ball
 Author:     Drew D. Lenhart
 Website:    https://github.com/dlenhart/floaterball
 Date:       12-03-2025
-Version:    0.2.3
+Version:    0.2.4
 
 Description:  Collect as many squares as possible within the time 
 limit. Use the walls and other objects to your advantage.
@@ -135,7 +135,12 @@ let FLTR = {
                 const height = isHorizontal ? FLTR.OBSTACLE_BASE_SIZE : FLTR.OBSTACLE_BASE_SIZE * sizeMultiplier;
                 const x = Math.round((FLTR.CANVAS_WIDTH - width) * Math.random());
                 const y = Math.round(FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - height) * Math.random());
-                obstacle = {x, y, width, height};
+                obstacle = {
+                    x,
+                    y,
+                    width,
+                    height
+                };
                 validPosition = true;
                 for (let j = 0; j < FLTR.obstacles.length; j++) {
                     const existing = FLTR.obstacles[j];
@@ -192,7 +197,10 @@ let FLTR = {
             FLTR.powerupFoodCollision();
             FLTR.x += FLTR.xSpeed;
             FLTR.y += FLTR.ySpeed;
-            FLTR.trail.push({x: FLTR.x, y: FLTR.y});
+            FLTR.trail.push({
+                x: FLTR.x,
+                y: FLTR.y
+            });
             if (FLTR.trail.length > FLTR.maxTrailLength) {
                 FLTR.trail.shift();
             }
@@ -248,8 +256,28 @@ let FLTR = {
         if (Math.round(FLTR.x) + FLTR.currentBallRadius > FLTR.powerupFoodXPos && Math.round(FLTR.x) - FLTR.currentBallRadius < FLTR.powerupFoodXPos + FLTR.FOOD_WIDTH &&
             Math.round(FLTR.y) + FLTR.currentBallRadius > FLTR.powerupFoodYPos && Math.round(FLTR.y) - FLTR.currentBallRadius < FLTR.powerupFoodYPos + FLTR.FOOD_HEIGHT) {
             if (FLTR.debug) console.log("Powerup food collision");
+
+            const oldRadius = FLTR.currentBallRadius;
             FLTR.powerupActive = true;
             FLTR.currentBallRadius = FLTR.BALL_RADIUS * FLTR.POWERUP_SIZE_MULTIPLIER;
+            const radiusDiff = FLTR.currentBallRadius - oldRadius;
+
+            if (FLTR.y - FLTR.currentBallRadius < FLTR.HEADER_HEIGHT) {
+                FLTR.y = FLTR.HEADER_HEIGHT + FLTR.currentBallRadius;
+            }
+
+            if (FLTR.y + FLTR.currentBallRadius > FLTR.CANVAS_HEIGHT) {
+                FLTR.y = FLTR.CANVAS_HEIGHT - FLTR.currentBallRadius;
+            }
+
+            if (FLTR.x - FLTR.currentBallRadius < 0) {
+                FLTR.x = FLTR.currentBallRadius;
+            }
+
+            if (FLTR.x + FLTR.currentBallRadius > FLTR.CANVAS_WIDTH) {
+                FLTR.x = FLTR.CANVAS_WIDTH - FLTR.currentBallRadius;
+            }
+
             FLTR.powerupFoodActive = false;
             FLTR.powerupFoodXPos = -100;
             FLTR.powerupFoodYPos = -100;
@@ -257,7 +285,7 @@ let FLTR = {
     },
 
     levelCheck: function () {
-        if (FLTR.timeLeft == 0 && FLTR.level !== FLTR.TOTAL_LEVELS) {
+        if (FLTR.timeLeft <= 0 && FLTR.level !== FLTR.TOTAL_LEVELS) {
             if (FLTR.levelScoreCount == 0) {
                 endGame();
                 return;
@@ -267,38 +295,56 @@ let FLTR = {
                 FLTR.gamePaused = true;
                 cancelAnimationFrame(game);
                 clearInterval(timer);
+                timer = null;
+
+                FLTR.obstacles = [];
+                FLTR.foodXPos = -100;
+                FLTR.foodYPos = -100;
+                FLTR.bonusFoodActive = false;
+                FLTR.bonusFoodXPos = -100;
+                FLTR.bonusFoodYPos = -100;
+                FLTR.powerupFoodActive = false;
+                FLTR.powerupFoodXPos = -100;
+                FLTR.powerupFoodYPos = -100;
+
                 FLTR.draw();
             }
-        } else if (FLTR.level == FLTR.TOTAL_LEVELS && FLTR.timeLeft == 0) {
+        } else if (FLTR.level == FLTR.TOTAL_LEVELS && FLTR.timeLeft <= 0) {
             endGame();
         }
         return;
     },
 
     continueToNextLevel: function () {
-        if (FLTR.levelTransition) {
-            FLTR.levelTransition = false;
-            FLTR.level = FLTR.level + 1;
-            FLTR.timeLeft = FLTR.getLevelTime(FLTR.level);
-            FLTR.levelScoreCount = 0;
-            FLTR.powerupActive = false;
-            FLTR.currentBallRadius = FLTR.BALL_RADIUS;
-            FLTR.powerupFoodActive = false;
-            FLTR.powerupFoodXPos = -100;
-            FLTR.powerupFoodYPos = -100;
-            FLTR.bonusFoodActive = false;
-            FLTR.bonusFoodXPos = -100;
-            FLTR.bonusFoodYPos = -100;
-            FLTR.generateObstacles();
-            FLTR.squares.random();
-            if (FLTR.level >= 3 && FLTR.level <= 20) {
-                FLTR.squares.bonus();
-            }
-            FLTR.gamePaused = false;
-            game = requestAnimationFrame(FLTR.gameloop);
-            timer = setInterval(updateTimer, FLTR.TIMER_INTERVAL);
+    if (FLTR.levelTransition) {
+        FLTR.levelTransition = false;
+        FLTR.level = FLTR.level + 1;
+        FLTR.timeLeft = FLTR.getLevelTime(FLTR.level);
+        FLTR.levelScoreCount = 0;
+        FLTR.powerupActive = false;
+        FLTR.currentBallRadius = FLTR.BALL_RADIUS;
+        FLTR.powerupFoodActive = false;
+        FLTR.powerupFoodXPos = -100;
+        FLTR.powerupFoodYPos = -100;
+        FLTR.bonusFoodActive = false;
+        FLTR.bonusFoodXPos = -100;
+        FLTR.bonusFoodYPos = -100;
+        FLTR.generateObstacles();
+        FLTR.squares.random();
+        if (FLTR.level >= 3 && FLTR.level <= 20) {
+            FLTR.squares.bonus();
         }
-    },
+        FLTR.gamePaused = false;
+        game = requestAnimationFrame(FLTR.gameloop);
+        
+        // CRITICAL: Ensure no timer exists before creating new one
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        timer = setInterval(updateTimer, FLTR.TIMER_INTERVAL);
+    }
+},
 
     draw: function () {
         try {
@@ -514,7 +560,15 @@ FLTR.text = {
             FLTR.ctx.fillStyle = col;
             FLTR.ctx.textAlign = 'center';
             FLTR.ctx.textBaseline = 'middle';
+            FLTR.ctx.shadowColor = 'black';
+            FLTR.ctx.shadowBlur = 4;
+            FLTR.ctx.shadowOffsetX = 2;
+            FLTR.ctx.shadowOffsetY = 2;
             FLTR.ctx.fillText(string, x, y);
+            FLTR.ctx.shadowColor = 'transparent';
+            FLTR.ctx.shadowBlur = 0;
+            FLTR.ctx.shadowOffsetX = 0;
+            FLTR.ctx.shadowOffsetY = 0;
             FLTR.ctx.textAlign = 'left';
             FLTR.ctx.textBaseline = 'alphabetic';
         }
@@ -691,3 +745,30 @@ startGame = function () {
         console.error('startGame error:', error.message);
     }
 }
+
+// Auto-pause when user switches tabs
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // User switched away - pause if game is active
+        if (!FLTR.gamePaused && !FLTR.gameEnded && !FLTR.levelTransition && timer) {
+            clearInterval(timer);
+            timer = null;
+            cancelAnimationFrame(game);
+            FLTR.gamePaused = true;
+            FLTR.draw();
+            updateButtonText("pauseb", "Resume");
+        }
+    }
+});
+
+// Auto-pause when user clicks outside of the window
+window.addEventListener('blur', function() {
+    if (!FLTR.gamePaused && !FLTR.gameEnded && !FLTR.levelTransition && timer) {
+        clearInterval(timer);
+        timer = null;
+        cancelAnimationFrame(game);
+        FLTR.gamePaused = true;
+        FLTR.draw();
+        updateButtonText("pauseb", "Resume");
+    }
+});
