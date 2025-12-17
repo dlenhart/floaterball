@@ -1,31 +1,37 @@
 FloaterBall
 ===============
 
+A physics-based collection game where you control a white ball that floats around the canvas with momentum-based movement. The core objective is to collect as many squares as 
+possible within a time limit while navigating through increasingly challenging levels.
+
+
 How to Play
+----
 
 Arrow Keys: Move the ball in any direction
 Shift: Brake/stop movement
 Spacebar: Continue to next level after completion
 
-Game Mechanics
+Scoring System
+----
 
--Use arrow keys to apply force to the ball in any direction
+Gray squares: 1 point each (main collectibles)
+Purple squares: 10 bonus points (appear after 5 seconds in level 2+)
+Green squares: 15 points each (1-3 spawn in level 2+)
+Orange squares: Powerup that doubles ball size temporarily
+Red squares: Game over if collected (appear on even levels 2+)
 
--Hold Shift to brake/stop movement
+Progression
+----
 
--The ball maintains momentum and bounces off walls
+50 levels total, each with decreasing time limits and increasing obstacles
 
--Collect gray squares (+1 point) to progress
+Win
+----
 
--Purple bonus squares (+10 points) appear after 5 seconds on level 2+
+Complete level by collecting at least one square before time runs out.
+Lose Conditions: Run out of time with zero points collected, or touch a red square (a.k.a the forbidden fruit)
 
--Orange powerup squares (20% spawn chance after 10 regular squares) temporarily double your ball size
-
--Black obstacles appear starting at level 2 and increase each level, bouncing you away on contact
-
--You must collect at least 1 square per level to continue
-
--Time decreases as you advance levels (20s initially, minimum 5s)
 
 Install
 ----
