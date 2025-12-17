@@ -9,11 +9,23 @@ Spacebar: Continue to next level after completion
 
 Game Mechanics
 
-Scoring: Regular squares = 1 point, Purple bonus squares = 10 points (appear in levels 3-20)
-Powerups: Orange squares appear randomly after collecting 10 regular squares, temporarily doubling your ball size
-Time Pressure: Starting at 30 seconds, time decreases as you progress (minimum 5 seconds)
-Obstacles: Black rectangles appear from level 2 onward, increasing with each level
-Level Progression: Advance only if you collect at least one square; game ends if you fail
+-Use arrow keys to apply force to the ball in any direction
+
+-Hold Shift to brake/stop movement
+
+-The ball maintains momentum and bounces off walls
+
+-Collect gray squares (+1 point) to progress
+
+-Purple bonus squares (+10 points) appear after 5 seconds on level 2+
+
+-Orange powerup squares (20% spawn chance after 10 regular squares) temporarily double your ball size
+
+-Black obstacles appear starting at level 2 and increase each level, bouncing you away on contact
+
+-You must collect at least 1 square per level to continue
+
+-Time decreases as you advance levels (20s initially, minimum 5s)
 
 Install
 ----
