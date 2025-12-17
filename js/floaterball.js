@@ -40,6 +40,9 @@ let FLTR = {
     OBSTACLE_COLOR: "#000000",
     OBSTACLE_STROKE_COLOR: "white",
     OBSTACLE_STROKE_WIDTH: 2,
+    POPUP_DURATION: 60,
+    POPUP_RISE_SPEED: 1,
+    POPUP_FONT_SIZE: 20,
     TEXT_SIZE: 14,
     TEXT_COLOR: "green",
     TEXT_FONT: "Courier New",
@@ -90,6 +93,7 @@ let FLTR = {
     lastFrameTime: 0,
     levelTransition: false,
     levelScoreCount: 0,
+    scorePopups: [],
 
     init: function () {
         try {
@@ -274,6 +278,7 @@ let FLTR = {
             if (FLTR.trail.length > FLTR.maxTrailLength) {
                 FLTR.trail.shift();
             }
+            FLTR.updateScorePopups();
             FLTR.levelCheck();
         } catch (error) {
             console.error('Update error:', error.message);
@@ -309,8 +314,9 @@ let FLTR = {
             if (FLTR.debug) console.log("Food collision");
             FLTR.score++;
             FLTR.levelScoreCount++;
+            FLTR.createScorePopup(FLTR.foodXPos + FLTR.FOOD_WIDTH / 2, FLTR.foodYPos, "+1");
             FLTR.squares.random();
-            // Spawn powerup in last 7 seconds of level 2+
+            // Spawn powerup in last 10 seconds of level 2+
             if (FLTR.timeLeft <= 10 && !FLTR.powerupFoodActive && FLTR.level >= 2) {
                 FLTR.squares.powerup();
             }
@@ -326,6 +332,8 @@ let FLTR = {
         ) {
             if (FLTR.debug) console.log("Bonus food collision");
             FLTR.score += FLTR.BONUS_FOOD_POINTS;
+            FLTR.levelScoreCount++;
+            FLTR.createScorePopup(FLTR.bonusFoodXPos + FLTR.FOOD_WIDTH / 2, FLTR.bonusFoodYPos, "+10");
             FLTR.bonusFoodActive = false;
             FLTR.bonusFoodXPos = -100;
             FLTR.bonusFoodYPos = -100;
@@ -380,7 +388,50 @@ let FLTR = {
             ) {
                 if (FLTR.debug) console.log("Green food collision");
                 FLTR.score += FLTR.GREEN_FOOD_POINTS;
+                FLTR.levelScoreCount++;
+                FLTR.createScorePopup(greenFood.x + FLTR.FOOD_WIDTH / 2, greenFood.y, "+15");
                 FLTR.greenFoodItems.splice(i, 1);
+            }
+        }
+    },
+
+    createScorePopup: function (x, y, text) {
+        FLTR.scorePopups.push({
+            x: x,
+            y: y,
+            text: text,
+            life: FLTR.POPUP_DURATION,
+            alpha: 1.0
+        });
+    },
+
+    updateScorePopups: function () {
+        for (let i = FLTR.scorePopups.length - 1; i >= 0; i--) {
+            const popup = FLTR.scorePopups[i];
+            popup.y -= FLTR.POPUP_RISE_SPEED;
+            popup.life--;
+            popup.alpha = popup.life / FLTR.POPUP_DURATION;
+
+            if (popup.life <= 0) {
+                FLTR.scorePopups.splice(i, 1);
+            }
+        }
+    },
+
+    drawScorePopups: function () {
+        if (FLTR.ctx) {
+            for (let i = 0; i < FLTR.scorePopups.length; i++) {
+                const popup = FLTR.scorePopups[i];
+                FLTR.ctx.save();
+                FLTR.ctx.font = 'bold ' + FLTR.POPUP_FONT_SIZE + 'px ' + FLTR.TEXT_FONT;
+                FLTR.ctx.fillStyle = FLTR.POPUP_COLOR;
+                FLTR.ctx.globalAlpha = popup.alpha;
+                FLTR.ctx.textAlign = 'center';
+                FLTR.ctx.strokeStyle = 'black';
+                FLTR.ctx.lineWidth = 3;
+                FLTR.ctx.strokeText(popup.text, popup.x, popup.y);
+                FLTR.ctx.fillText(popup.text, popup.x, popup.y);
+                FLTR.ctx.restore();
             }
         }
     },
@@ -511,6 +562,8 @@ let FLTR = {
                 FLTR.squares.forbiddenFood(FLTR.forbiddenFoodXPos, FLTR.forbiddenFoodYPos);
             }
 
+            FLTR.drawScorePopups();
+
             FLTR.text.text('Score: ' + FLTR.score + '  Level: ' + FLTR.level, 5, 14, 14, 'white');
             FLTR.text.rightAlignedText(
                 'Time: ' + FLTR.timeLeft + 's  High score: ' + FLTR.highScore, FLTR.CANVAS_WIDTH - 5, 14, 14, 'white'
@@ -623,6 +676,7 @@ FLTR.squares = {
                 }
             }
 
+            // check
             if (validPosition && FLTR.forbiddenFoodActive && FLTR.rectanglesOverlap(
                     FLTR.foodXPos,
                     FLTR.foodYPos,
@@ -633,6 +687,23 @@ FLTR.squares = {
                     FLTR.FOOD_WIDTH,
                     FLTR.FOOD_HEIGHT)) {
                 validPosition = false;
+            }
+
+            // Check green food
+            for (let i = 0; i < FLTR.greenFoodItems.length; i++) {
+                const green = FLTR.greenFoodItems[i];
+                if (FLTR.rectanglesOverlap(
+                        FLTR.foodXPos,
+                        FLTR.foodYPos,
+                        FLTR.FOOD_WIDTH,
+                        FLTR.FOOD_HEIGHT,
+                        green.x,
+                        green.y,
+                        FLTR.FOOD_WIDTH,
+                        FLTR.FOOD_HEIGHT)) {
+                    validPosition = false;
+                    break;
+                }
             }
 
             attempts++;
