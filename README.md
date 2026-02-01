@@ -17,7 +17,7 @@ Scoring System
 
 Gray squares: 1 point each (main collectibles)
 Purple squares: 10 bonus points (appear after 5 seconds in level 2+)
-Green squares: 15 points each (1-3 spawn in level 2+)
+Green squares: 5 points each (1-3 spawn in level 2+)
 Orange squares: Powerup that doubles ball size temporarily
 Red squares: Game over if collected (appear on even levels 2+)
 
