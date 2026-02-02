@@ -732,7 +732,10 @@ let FLTR = {
                 const centerX = FLTR.CANVAS_WIDTH / 2;
                 const centerY = FLTR.CANVAS_HEIGHT / 2;
                 if (FLTR.forbiddenFoodDeath) {
-                    FLTR.text.centeredText('You got the forbidden fruit & died!', centerX, centerY - 20, 20, '#ff00ff');
+                    FLTR.text.centeredText(
+                        'You got the forbidden fruit & died!', centerX, centerY - 20, 20, 
+                        '#ff00ff'
+                    );
                 } else {
                     FLTR.text.centeredText('Game Over', centerX, centerY - 20, 24, FLTR.TEXT_COLOR);
                 }
@@ -1037,7 +1040,6 @@ pauseGame = function () {
             FLTR.gamePaused = true;
             FLTR.scorePopups = [];
             FLTR.draw();
-            updateButtonText("pauseb", "Resume");
         } else if (FLTR.gamePaused) {
             game = requestAnimationFrame(FLTR.gameloop);
             if (timer) {
@@ -1046,7 +1048,6 @@ pauseGame = function () {
             }
             timer = setInterval(updateTimer, FLTR.TIMER_INTERVAL);
             FLTR.gamePaused = false;
-            updateButtonText("pauseb", "Pause");
         }
     } catch (error) {
         console.error('pauseGame error:', error.message);
@@ -1065,7 +1066,6 @@ endGame = function () {
             localStorage.setItem('floaterball_highscore', FLTR.highScore.toString());
         }
 
-        showHideButton("pauseb", "none");
         showHideButton("restart", "block");
     } catch (error) {
         console.error('endGame error:', error.message);
@@ -1101,17 +1101,6 @@ startGame = function () {
 
         showHideButton("start");
         showHideButton("restart");
-
-        if (!document.getElementById("pauseb")) {
-            const pauseBtn = document.createElement("button");
-            pauseBtn.id = "pauseb";
-            pauseBtn.textContent = "Pause";
-            pauseBtn.onclick = pauseGame;
-            // pauseBtn.style.cssText = "padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 10px;";
-            const container = document.body;
-            container.appendChild(pauseBtn);
-        }
-        showHideButton("pauseb", "block");
 
         FLTR.generateObstacles();
         FLTR.squares.random();
