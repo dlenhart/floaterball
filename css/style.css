@@ -237,7 +237,6 @@ header {
 }
 
 h1 {
-    font-family: 'Orbitron', sans-serif;
     font-size: 4rem;
     font-weight: 900;
     color: var(--neon-cyan);
@@ -303,7 +302,6 @@ h1 {
 }
 
 h2 {
-    font-family: 'Orbitron', sans-serif;
     font-size: 2rem;
     color: var(--neon-yellow);
     margin-bottom: 20px;
@@ -312,7 +310,6 @@ h2 {
 }
 
 h3 {
-    font-family: 'Orbitron', sans-serif;
     font-size: 1.4rem;
     color: var(--neon-magenta);
     margin-top: 25px;
@@ -413,7 +410,6 @@ li::before {
     padding: 5px 12px;
     margin: 3px;
     border-radius: 4px;
-    font-family: 'Orbitron', monospace;
     font-weight: 700;
     color: var(--neon-cyan);
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);

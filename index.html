@@ -8,20 +8,18 @@
 
 <body>
     <div style="display: block; width: auto; position: relative; padding-top: 10px;">
-        <div class="titleBox"><img src="images/ascii-art-text.png" /></div>
-        
-        <!-- Canvas Container for overlay positioning -->
+        <div class="titleBox"><img src="images/floater-ball-logo-light.png" /></div>
+
         <div style="position: relative; width: 600px; margin: 0 auto;">
             <canvas></canvas>
-            
-            <!-- Instruction Overlay -->
+
             <div id="instructionOverlay" class="instructionOverlay">
-                <p style="margin-bottom: 20px; line-height: 1.6;">
-                    Collect as many squares as possible within the time 
-                    limit. Use the walls and other objects to your advantage. Don't eat
-                    the red squares!
+                <p style="margin-bottom: 5px; line-height: 1.0; text-align: justify;">
+                    Floater Ball: Collect as many squares as possible within the time
+                    limit. Use the walls and other objects to your advantage and get 
+                    the highest score possible. P.S. don't eat the red squares!
                 </p>
-                
+
                 <div style="margin-bottom: 20px;">
                     <strong>Movement</strong><br />
                     <img src="images/arrow-keys.png" height="24" width="80" />
@@ -30,15 +28,41 @@
                     <br />
                     <img src="images/shift-keys.png" width="122" height="24" />
                 </div>
-                
+
                 <a href="#" class="playButton" onclick="hideInstructionsAndStart(); return false;">Play</a>
+                <a href="instructions.html" class="playButton">Instructions</a>
+            </div>
+
+            <div id="levelTransitionOverlay" class="instructionOverlay" style="display: none;">
+                <h2 style="color: #ffff00; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">LEVEL COMPLETE!</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem;">
+                    Great job! Ready for the next challenge?
+                </p>
+                <p style="color: #ff00ff; font-size: 0.9rem;">
+                    Press <span style="display: inline-block; background: #1a1a1a; border: 2px solid #00ffff; padding: 5px 12px; margin: 3px; border-radius: 4px; font-weight: 700; color: #00ffff;">SPACEBAR</span> to continue
+                </p>
+            </div>
+
+            <div id="gameOverOverlay" class="instructionOverlay" style="display: none;">
+                <h2 id="gameOverTitle" style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-bottom: 20px;">GAME OVER!</h2>
+                <p id="gameOverMessage" style="margin-bottom: 20px; font-size: 1.1rem; color: #00ffff;">
+                    Your score was: <span id="finalScore" style="color: #ffff00; font-weight: bold;">0</span>
+                </p>
+                <a href="#" class="playButton" onclick="resetGame(); return false;">PLAY AGAIN</a>
+            </div>
+
+            <div id="exitConfirmOverlay" class="instructionOverlay" style="display: none;">
+                <h2 style="color: #ffff00; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">EXIT GAME?</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem; color: #00ffff;">
+                    Would you like to exit the game?<br/>
+                    Your progress will be lost.
+                </p>
+                <a href="#" class="playButton" onclick="confirmExit(); return false;" style="margin: 0 10px;">YES</a>
+                <a href="#" class="playButton" onclick="cancelExit(); return false;" style="margin: 0 10px;">NO</a>
             </div>
         </div>
-        
-        <a id="start" class="pause" href="#" onclick="startGame()" style="display: none;">Play</a>
-        <a id="restart" class="pause" style="display: none" href="#" onclick="resetGame()">Play Again</a>
 
-        <div class="footer">© 2025 SnowyWorks - v0.2.3<br />
+        <div class="footer">© 2016-2026 SnowyWorks - v0.2.3<br />
             <img src="images/snowyworks_lng_logo.png" width="125" height="25" style="padding-top: 4px;" />
         </div>
     </div>
@@ -48,6 +72,16 @@
         function hideInstructionsAndStart() {
             document.getElementById('instructionOverlay').style.display = 'none';
             startGame();
+        }
+
+        function confirmExit() {
+            document.getElementById('exitConfirmOverlay').style.display = 'none';
+            exitToMainMenu();
+        }
+
+        function cancelExit() {
+            document.getElementById('exitConfirmOverlay').style.display = 'none';
+            resumeFromExit();
         }
     </script>
 </body>
