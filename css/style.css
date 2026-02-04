@@ -164,6 +164,25 @@ canvas {
     box-shadow: var(--glow);
 }
 
+.startOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    border: none;
+    padding: 30px;
+    width: 500px;
+    text-align: center;
+    z-index: 1000;
+    color: var(--neon-cyan);
+}
+
+.startOverlay img {
+    display: block;
+    margin: 0 auto;
+}
+
 .instructionOverlay {
     position: absolute;
     top: 50%;
@@ -201,9 +220,35 @@ canvas {
     transition: all 0.3s ease;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     font-size: 1.2rem;
+    margin: 5px;
 }
 
 .playButton:hover {
+    background: var(--neon-cyan);
+    color: var(--deep-black);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+    transform: translateY(-2px);
+}
+
+/* Full-width button variant */
+.playButton-fullWidth {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    background: var(--dark-gray);
+    color: var(--neon-cyan);
+    padding: 12px 40px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 5px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    font-size: 1.2rem;
+    margin: 5px 0;
+}
+
+.playButton-fullWidth:hover {
     background: var(--neon-cyan);
     color: var(--deep-black);
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
@@ -428,6 +473,15 @@ li::before {
 .tip-box strong {
     color: var(--neon-magenta);
     text-shadow: 0 0 5px var(--neon-magenta);
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    color: var(--neon-yellow);
+    font-size: 1.2rem;
+    font-weight: 600;
 }
 
 @media (max-width: 768px) {

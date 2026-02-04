@@ -285,7 +285,8 @@ let FLTR = {
         while (!validPosition && attempts < 100) {
             x = Math.round((FLTR.CANVAS_WIDTH - FLTR.FOOD_WIDTH) * Math.random());
             y = Math.round(
-                FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - FLTR.FOOD_HEIGHT) * Math.random()
+                FLTR.HEADER_HEIGHT + (FLTR.CANVAS_HEIGHT - FLTR.HEADER_HEIGHT - FLTR.FOOD_HEIGHT) 
+                * Math.random()
             );
 
             validPosition = FLTR.isPositionValidForFood(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, excludeTypes);
@@ -475,8 +476,8 @@ let FLTR = {
             FLTR.createScorePopup(FLTR.foodXPos + FLTR.FOOD_WIDTH / 2, FLTR.foodYPos, "+1");
             FLTR.squares.random();
 
-            // Spawn powerup in last 10 seconds of level 2+
-            if (FLTR.timeLeft <= 10 && !FLTR.powerupFoodActive && FLTR.level >= 2) {
+            // Spawn powerup in last 12 seconds of level 2+
+            if (FLTR.timeLeft <= 12 && !FLTR.powerupFoodActive && FLTR.level >= 2) {
                 FLTR.squares.powerup();
             }
         }
@@ -756,6 +757,7 @@ let FLTR = {
                         title.style.textShadow = '0 0 10px #ff00ff';
                         message.innerHTML = 'Your score was: <span style="color: #ffff00; font-weight: bold;">' + FLTR.score + '</span>';
                     }
+                    
                     overlay.style.display = 'block';
                 }
             }
@@ -1177,9 +1179,9 @@ exitToMainMenu = function () {
         saveHighScoreIfNeeded();
         resetGameState();
         
-        const instructionOverlay = document.getElementById('instructionOverlay');
-        if (instructionOverlay) {
-            instructionOverlay.style.display = 'block';
+        const startOverlay = document.getElementById('startOverlay');
+        if (startOverlay) {
+            startOverlay.style.display = 'block';
         }
         
         if (FLTR.ctx) {
