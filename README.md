@@ -1,50 +1,75 @@
-FloaterBall
-===============
+# Floater Ball
 
-A physics-based collection game where you control a white ball that floats around the canvas with momentum-based movement. The core objective is to collect as many squares as 
-possible within a time limit while navigating through increasingly challenging levels.
+A physics-based collection game where you control a white ball that floats around a canvas with momentum-based movement. Collect as many squares as possible within the time limit while navigating through increasingly challenging levels. Don't eat the red squares!
+
+**Version:** 0.3.1  
+**Author:** Drew D. Lenhart, SnowyWorks  
+**Website:** [snowyworks.com/games](https://snowyworks.com/games)  
+**Source:** [github.com/dlenhart/floaterball](https://github.com/dlenhart/floaterball)
+
+## How to Play
+
+### Controls
+
+| Key | Action |
+|-----|--------|
+| Arrow Keys | Move the ball |
+| Shift | Brake / stop all movement |
+| Spacebar | Continue to next level (after completing a level) |
+| P | Pause / resume the game |
+| Esc | Exit to main menu |
+
+### Scoring
+
+| Item | Points | Details |
+|------|--------|---------|
+| Gray Square | 1 point | Standard collectible, always present |
+| Green Square | 5 points | 1–3 spawn randomly per level (Level 2+) |
+| Purple Square | 10 points | Bonus food that appears after 5 seconds (Level 2+) |
+| Orange Square | Power-up | Doubles ball size temporarily (no points) |
+| Red Square | **Game Over!** | Forbidden fruit — appears on even-numbered levels (Level 2+) |
+
+### Obstacles
+
+Black obstacles start appearing at Level 2. The number increases with each level. Your ball bounces off them — use them strategically!
+
+## Progression
+
+- **50 levels** total
+- Starting time: **20 seconds** per level
+- Every 3 levels, the time limit decreases by 1 second (minimum 5 seconds)
+- Obstacles increase each level (starting at Level 2: 3 obstacles, +1 per level)
+
+### Win Condition
+
+Complete a level by collecting at least one square before time runs out.
+
+### Lose Conditions
+
+- Run out of time with zero points collected
+- Touch a red square (instant game over)
+
+## Features
+
+- Momentum-based physics
+- Ball trail effect
+- Score pop-ups on collection
+- High score saved locally (localStorage)
+- Auto-pause when switching tabs or losing window focus
+- Wall and obstacle bouncing
+
+## Install
+
+1. Download or clone the repository.
+2. Open `index.html` in a browser.
+
+No build tools or server required.
 
 
-How to Play
-----
+```
 
-Arrow Keys: Move the ball in any direction
-Shift: Brake/stop movement
-Spacebar: Continue to next level after completion
+## License
 
-Scoring System
-----
-
-Gray squares: 1 point each (main collectibles)
-Purple squares: 10 bonus points (appear after 5 seconds in level 2+)
-Green squares: 5 points each (1-3 spawn in level 2+)
-Orange squares: Powerup that doubles ball size temporarily
-Red squares: Game over if collected (appear on even levels 2+)
-
-Progression
-----
-
-50 levels total, each with decreasing time limits and increasing obstacles
-
-Win
-----
-
-Complete level by collecting at least one square before time runs out.
-Lose Conditions: Run out of time with zero points collected, or touch a red square (a.k.a the forbidden fruit)
-
-
-Install
-----
-1.  Download code.
-
-2.  Open index.html in browser.
-
-Website
-----
-https://snowyworks.com/games
-
-License
-----
 MIT License
 
 Copyright (c) 2025 Drew D. Lenhart, SnowyWorks
