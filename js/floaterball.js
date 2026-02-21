@@ -361,7 +361,13 @@ let FLTR = {
                 * Math.random()
             );
 
-            validPosition = FLTR.isPositionValidForFood(x, y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT, excludeTypes);
+            validPosition = FLTR.isPositionValidForFood(
+                x, 
+                y, 
+                FLTR.FOOD_WIDTH, 
+                FLTR.FOOD_HEIGHT, 
+                excludeTypes
+            );
             attempts++;
         }
 
@@ -666,7 +672,12 @@ let FLTR = {
         if (FLTR.stickyStuck) return;
         for (let i = FLTR.stickyMines.length - 1; i >= 0; i--) {
             const mine = FLTR.stickyMines[i];
-            if (FLTR.ballCollidesWithFood(mine.x, mine.y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT)) {
+            if (FLTR.ballCollidesWithFood(
+                mine.x, 
+                mine.y, 
+                FLTR.FOOD_WIDTH, 
+                FLTR.FOOD_HEIGHT)
+            ) {
                 if (FLTR.debug) console.log("Sticky mine collision - stuck for 5 seconds!");
                 FLTR.xSpeed = 0;
                 FLTR.ySpeed = 0;

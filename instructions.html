@@ -18,7 +18,8 @@
 
         <div class="section">
             <h2>Objective</h2>
-            <p>Collect as many squares as possible within the time limit. Use the walls and other objects to your advantage and get the highest score possible. P.S. don't eat the red squares!</p>
+            <p>Collect as many squares as possible within the time limit. Use the walls and other objects to your advantage and get the highest score possible. 
+                P.S. don't eat the red squares!</p>
         </div>
 
         <div class="section">
@@ -50,7 +51,7 @@
 
         <div class="section">
             <h2>How to Play</h2>
-            <p>You control a white ball that moves with realistic momentum and damping physics. The ball will continue
+            <p>You control a white ball that moves with momentum, as if your floating in space. The ball will continue
                 sliding in the direction you push it, gradually slowing down over time.</p>
 
             <h3>Food Items to Collect</h3>
@@ -62,18 +63,18 @@
                 <li>Respawn immediately when collected</li>
             </ul>
 
-            <p><span class="food-item purple-square">Purple Squares (10 points)</span></p>
-            <ul>
-                <li>Bonus food that appears 5 seconds into each level (Level 2+)</li>
-                <li>Worth 10x the points of gray squares</li>
-                <li>Limited availability - grab them quickly!</li>
-            </ul>
-
             <p><span class="food-item green-square">Green Squares (5 points)</span></p>
             <ul>
                 <li>Special food items that spawn randomly (Level 2+)</li>
                 <li>1-3 green squares may appear per level</li>
-                <li>Good point boost for strategic collecting</li>
+                <li>Good point boost</li>
+            </ul>
+
+            <p><span class="food-item purple-square">Purple Squares (10 points)</span></p>
+            <ul>
+                <li>Bonus food that appears 5 seconds into each level (Level 2+)</li>
+                <li>Worth 10x the points of gray squares</li>
+                <li>Limited availability</li>
             </ul>
 
             <p><span class="food-item orange-square">Orange Squares (Power-up)</span></p>
@@ -89,14 +90,7 @@
             <ul>
                 <li>Forbidden food that appears on even-numbered levels (2, 4, 6, etc.)</li>
                 <li>Spawns 5 seconds into the level</li>
-                <li><strong>Eating a red square ends the game immediately!</strong></li>
-            </ul>
-
-            <p><span class="food-item black-obstacle">Black Obstacles</span></p>
-            <ul>
-                <li>Start appearing at Level 2</li>
-                <li>Number of obstacles increases with each level</li>
-                <li>Walls you can bounce off of - use them strategically!</li>
+                <li><strong>Eating the forbidden fruit ends the game immediately!</strong></li>
             </ul>
 
             <p><span class="food-item" style="background: #FFD700; border-color: #FFA500; color: #0a0a0a;">Sticky Mines &#9651; (Stuck 5 seconds!)</span></p>
@@ -112,12 +106,12 @@
         <div class="section">
             <h2>Level Progression</h2>
             <ul>
-                <li><strong>30 Total Levels</strong> to complete</li>
-                <li><strong>Time decreases</strong> as you advance (starts at 25 seconds)</li>
-                <li><strong>Must reach target score</strong> to unlock next level</li>
+                <li><strong>50 Total Levels</strong> to complete</li>
+                <li><strong>Time decreases</strong> as you advance (starts at 20 seconds)</li>
+                <li><strong>Must collect at least 1 food to advance, or game ends</li>
                 <li><strong>More obstacles</strong> added each level for increased difficulty</li>
                 <li><strong>Sticky mines</strong> appear on even levels after Level 5 (2 mines at first, increasing every 6 levels)</li>
-                <li>Every 3 levels, time limit reduces by 1 second (minimum 5 seconds)</li>
+                <li>Every 3 levels, time limit reduces by 1 second</li>
             </ul>
         </div>
 
@@ -147,19 +141,9 @@
             </div>
         </div>
 
-        <div class="section">
-            <h2>Scoring</h2>
-            <ul>
-                <li>Gray Square: <strong>1 point</strong></li>
-                <li>Green Square: <strong>5 points</strong></li>
-                <li>Purple Square: <strong>10 points</strong></li>
-                <li>Orange Square: <strong>Power-up</strong> (no points, but helpful!)</li>
-                <li><strong>High Score</strong> is saved locally - try to beat your best!</li>
-            </ul>
-        </div>
-
         <footer>
-            GOOD LUCK!
+            <div class="subtitle">GOOD LUCK!</div><br />
+            <a href="index.html" class="playButton">Play Game</a>
         </footer>
     </div>
 </body>
