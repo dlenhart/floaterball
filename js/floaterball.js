@@ -2,12 +2,12 @@
 Title:      Floater Ball
 Author:     Drew D. Lenhart
 Website:    https://github.com/dlenhart/floaterball
-Date:       02-03-2026
-Version:    0.3.1
+Date:       02-21-2026
+Version:    0.3.2
 
 Description:  Collect as many squares as possible within the time 
-limit. Use the walls and other objects to your advantage. Don't eat
-the red squares!
+limit. Use the walls and other objects to your advantage and get 
+the highest score possible. P.S. don't eat the red squares!
 */
 
 let game = null;
@@ -41,6 +41,9 @@ let FLTR = {
     OBSTACLE_COLOR: "#000000",
     OBSTACLE_STROKE_COLOR: "#00ffff",
     OBSTACLE_STROKE_WIDTH: 2,
+    STICKY_MINE_COLOR: "#FFD700",
+    STICKY_MINE_STROKE_COLOR: "#FFA500",
+    STICKY_MINE_DURATION: 5000,
     POPUP_DURATION: 60,
     POPUP_RISE_SPEED: 1,
     POPUP_FONT_SIZE: 20,
@@ -97,6 +100,51 @@ let FLTR = {
     levelTransition: false,
     levelScoreCount: 0,
     scorePopups: [],
+    stickyMines: [],
+    stickyStuck: false,
+    stickyStuckTimer: null,
+    stickyStuckStart: 0,
+    stickyStuckRemaining: 0,
+    wallHitCooldown: false,
+
+    sounds: {},
+
+    loadSounds: function () {
+        const soundFiles = {
+            eatRegular:   'assets/sfx/eat-regular-food.wav',
+            eatGreen:     'assets/sfx/green-fruit.wav',
+            eatPurple:    'assets/sfx/purple-fruit.wav',
+            eatOrange:    'assets/sfx/orange-fruit.wav',
+            forbidden:    'assets/sfx/forbidden-fruit.wav',
+            obstacleHit:  'assets/sfx/obstacle-hit.wav',
+            stickyMine:   'assets/sfx/sticky-mines.wav',
+            wallHit:      'assets/sfx/wall-hit.wav',
+        };
+
+        for (const [key, src] of Object.entries(soundFiles)) {
+            const audio = new Audio(src);
+            audio.preload = 'auto';
+            FLTR.sounds[key] = audio;
+        }
+    },
+
+    playSound: function (key) {
+        try {
+            const sound = FLTR.sounds[key];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(function () {});
+            }
+        } catch (e) {}
+    },
+
+    playWallHit: function () {
+        if (!FLTR.wallHitCooldown) {
+            FLTR.playSound('wallHit');
+            FLTR.wallHitCooldown = true;
+            setTimeout(function () { FLTR.wallHitCooldown = false; }, 150);
+        }
+    },
 
     init: function () {
         try {
@@ -115,6 +163,8 @@ let FLTR = {
 
             const savedHighScore = localStorage.getItem('floaterball_highscore');
             FLTR.highScore = savedHighScore ? parseInt(savedHighScore, 10) : 0;
+
+            FLTR.loadSounds();
         } catch (error) {
             console.error('Initialization error:', error.message);
             alert('Failed to initialize game: ' + error.message);
@@ -128,6 +178,11 @@ let FLTR = {
     getObstacleCount: function (level) {
         if (level < 2) return 0;
         return 3 + (level - 2);
+    },
+
+    getStickyMineCount: function (level) {
+        if (level <= 5 || level % 2 !== 0) return 0;
+        return Math.floor((level - 6) / 6) + 2;
     },
 
     rectanglesOverlap: function (x1, y1, w1, h1, x2, y2, w2, h2) {
@@ -175,12 +230,13 @@ let FLTR = {
         FLTR.resetFoodPosition('powerup');
         FLTR.resetFoodPosition('forbidden');
         FLTR.greenFoodItems = [];
+        FLTR.stickyMines = [];
         FLTR.foodXPos = -100;
         FLTR.foodYPos = -100;
     },
 
     isPositionValidForFood: function (x, y, width, height, excludeTypes = []) {
-        // Check obstacles
+        // Check black obstacles
         for (let i = 0; i < FLTR.obstacles.length; i++) {
             const obs = FLTR.obstacles[i];
             if (FLTR.rectanglesOverlap(
@@ -271,6 +327,22 @@ let FLTR = {
                         FLTR.FOOD_HEIGHT)) {
                     return false;
                 }
+            }
+        }
+
+        // Check sticky mines
+        for (let i = 0; i < FLTR.stickyMines.length; i++) {
+            const mine = FLTR.stickyMines[i];
+            if (FLTR.rectanglesOverlap(
+                    x,
+                    y,
+                    width,
+                    height,
+                    mine.x,
+                    mine.y,
+                    FLTR.FOOD_WIDTH,
+                    FLTR.FOOD_HEIGHT)) {
+                return false;
             }
         }
 
@@ -382,10 +454,21 @@ let FLTR = {
         for (let i = 0; i < FLTR.greenFoodCount; i++) {
             FLTR.squares.greenFood();
         }
+
+        FLTR.stickyMines = [];
+        const stickyMineCount = FLTR.getStickyMineCount(FLTR.level);
+        for (let i = 0; i < stickyMineCount; i++) {
+            FLTR.squares.stickyMine();
+        }
     },
 
     update: function () {
         try {
+            if (FLTR.stickyStuck) {
+                FLTR.updateScorePopups();
+                FLTR.levelCheck();
+                return;
+            }
             FLTR.checkKeys.move();
             FLTR.xSpeed *= FLTR.DAMPING;
             FLTR.ySpeed *= FLTR.DAMPING;
@@ -397,6 +480,7 @@ let FLTR = {
             FLTR.powerupFoodCollision();
             FLTR.greenFoodCollision();
             FLTR.forbiddenFoodCollision();
+            FLTR.stickyMineCollision();
             FLTR.x += FLTR.xSpeed;
             FLTR.y += FLTR.ySpeed;
             FLTR.trail.push({
@@ -419,6 +503,7 @@ let FLTR = {
             FLTR.x + FLTR.xSpeed + FLTR.currentBallRadius >= FLTR.canvas.width
         ) {
             FLTR.xSpeed = -FLTR.xSpeed;
+            FLTR.playWallHit();
             if (FLTR.debug) console.log(FLTR.canvas.width + " Position: " + FLTR.x);
         }
     },
@@ -429,6 +514,7 @@ let FLTR = {
             FLTR.y + FLTR.ySpeed + FLTR.currentBallRadius >= FLTR.canvas.height
         ) {
             FLTR.ySpeed = -FLTR.ySpeed;
+            FLTR.playWallHit();
             if (FLTR.debug) console.log(FLTR.canvas.height + " Position: " + FLTR.y);
         }
     },
@@ -446,6 +532,7 @@ let FLTR = {
                     obs.height)) {
                 FLTR.xSpeed = -FLTR.xSpeed * 0.8;
                 FLTR.ySpeed = -FLTR.ySpeed * 0.8;
+                FLTR.playSound('obstacleHit');
                 const centerX = obs.x + obs.width / 2;
                 const centerY = obs.y + obs.height / 2;
                 const dx = FLTR.x - centerX;
@@ -473,6 +560,7 @@ let FLTR = {
             if (FLTR.debug) console.log("Food collision");
             FLTR.score++;
             FLTR.levelScoreCount++;
+            FLTR.playSound('eatRegular');
             FLTR.createScorePopup(FLTR.foodXPos + FLTR.FOOD_WIDTH / 2, FLTR.foodYPos, "+1");
             FLTR.squares.random();
 
@@ -494,6 +582,7 @@ let FLTR = {
             if (FLTR.debug) console.log("Bonus food collision");
             FLTR.score += FLTR.BONUS_FOOD_POINTS;
             FLTR.levelScoreCount++;
+            FLTR.playSound('eatPurple');
             FLTR.createScorePopup(
                 FLTR.bonusFoodXPos + FLTR.FOOD_WIDTH / 2, FLTR.bonusFoodYPos, "+10"
             );
@@ -513,6 +602,7 @@ let FLTR = {
             const oldRadius = FLTR.currentBallRadius;
 
             FLTR.powerupActive = true;
+            FLTR.playSound('eatOrange');
             FLTR.currentBallRadius = FLTR.BALL_RADIUS * FLTR.POWERUP_SIZE_MULTIPLIER;
 
             const radiusDiff = FLTR.currentBallRadius - oldRadius;
@@ -548,6 +638,7 @@ let FLTR = {
                 if (FLTR.debug) console.log("Green food collision");
                 FLTR.score += FLTR.GREEN_FOOD_POINTS;
                 FLTR.levelScoreCount++;
+                FLTR.playSound('eatGreen');
                 FLTR.createScorePopup(
                     greenFood.x + FLTR.FOOD_WIDTH / 2,
                     greenFood.y, "+" + FLTR.GREEN_FOOD_POINTS
@@ -565,8 +656,34 @@ let FLTR = {
                 FLTR.FOOD_WIDTH,
                 FLTR.FOOD_HEIGHT)) {
             if (FLTR.debug) console.log("Forbidden food collision - Game Over!");
+            FLTR.playSound('forbidden');
             FLTR.forbiddenFoodDeath = true;
             endGame();
+        }
+    },
+
+    stickyMineCollision: function () {
+        if (FLTR.stickyStuck) return;
+        for (let i = FLTR.stickyMines.length - 1; i >= 0; i--) {
+            const mine = FLTR.stickyMines[i];
+            if (FLTR.ballCollidesWithFood(mine.x, mine.y, FLTR.FOOD_WIDTH, FLTR.FOOD_HEIGHT)) {
+                if (FLTR.debug) console.log("Sticky mine collision - stuck for 5 seconds!");
+                FLTR.xSpeed = 0;
+                FLTR.ySpeed = 0;
+                FLTR.stickyStuck = true;
+                FLTR.playSound('stickyMine');
+                FLTR.stickyStuckStart = Date.now();
+                FLTR.stickyStuckRemaining = FLTR.STICKY_MINE_DURATION;
+                FLTR.createScorePopup(mine.x + FLTR.FOOD_WIDTH / 2, mine.y, "Stuck!");
+                FLTR.stickyMines.splice(i, 1);
+
+                FLTR.stickyStuckTimer = setTimeout(function () {
+                    FLTR.stickyStuck = false;
+                    FLTR.stickyStuckTimer = null;
+                    FLTR.stickyStuckRemaining = 0;
+                }, FLTR.STICKY_MINE_DURATION);
+                break;
+            }
         }
     },
 
@@ -667,6 +784,11 @@ let FLTR = {
             FLTR.levelScoreCount = 0;
             FLTR.powerupActive = false;
             FLTR.currentBallRadius = FLTR.BALL_RADIUS;
+            FLTR.stickyStuck = false;
+            if (FLTR.stickyStuckTimer) {
+                clearTimeout(FLTR.stickyStuckTimer);
+                FLTR.stickyStuckTimer = null;
+            }
             FLTR.resetAllSpecialFood();
             FLTR.generateObstacles();
             FLTR.squares.random();
@@ -708,6 +830,14 @@ let FLTR = {
             FLTR.greenFoodItems.forEach(greenFood => {
                 FLTR.squares.green(greenFood.x, greenFood.y);
             });
+
+            FLTR.stickyMines.forEach(mine => {
+                FLTR.squares.drawStickyMine(mine.x, mine.y);
+            });
+
+            if (FLTR.stickyStuck) {
+                FLTR.text.centeredText('Stuck!', FLTR.x, FLTR.y - FLTR.currentBallRadius - 15, 16, '#FFD700');
+            }
 
             if (FLTR.forbiddenFoodActive) {
                 FLTR.squares.forbiddenFood(FLTR.forbiddenFoodXPos, FLTR.forbiddenFoodYPos);
@@ -897,6 +1027,35 @@ FLTR.squares = {
             FLTR.ctx.strokeRect(x, y, width, height);
             FLTR.ctx.lineWidth = 1;
         }
+    },
+
+    stickyMine: function () {
+        const pos = FLTR.generateFoodPosition([]);
+        if (pos) {
+            FLTR.stickyMines.push({ x: pos.x, y: pos.y });
+        }
+    },
+
+    drawStickyMine: function (x, y) {
+        if (FLTR.ctx) {
+            const cx = x + FLTR.FOOD_WIDTH / 2;
+            const topY = y;
+            const bottomY = y + FLTR.FOOD_HEIGHT;
+            const leftX = x;
+            const rightX = x + FLTR.FOOD_WIDTH;
+
+            FLTR.ctx.beginPath();
+            FLTR.ctx.moveTo(cx, topY);
+            FLTR.ctx.lineTo(rightX, bottomY);
+            FLTR.ctx.lineTo(leftX, bottomY);
+            FLTR.ctx.closePath();
+            FLTR.ctx.fillStyle = FLTR.STICKY_MINE_COLOR;
+            FLTR.ctx.fill();
+            FLTR.ctx.strokeStyle = FLTR.STICKY_MINE_STROKE_COLOR;
+            FLTR.ctx.lineWidth = 2;
+            FLTR.ctx.stroke();
+            FLTR.ctx.lineWidth = 1;
+        }
     }
 };
 
@@ -1062,6 +1221,13 @@ pauseGameEngine = function () {
             timer = null;
             FLTR.gamePaused = true;
             FLTR.scorePopups = [];
+
+            if (FLTR.stickyStuck && FLTR.stickyStuckTimer) {
+                clearTimeout(FLTR.stickyStuckTimer);
+                FLTR.stickyStuckTimer = null;
+                FLTR.stickyStuckRemaining -= (Date.now() - FLTR.stickyStuckStart);
+                if (FLTR.stickyStuckRemaining < 0) FLTR.stickyStuckRemaining = 0;
+            }
         }
     } catch (error) {
         console.error('pauseGameEngine error:', error.message);
@@ -1078,6 +1244,18 @@ resumeGameEngine = function () {
             }
             timer = setInterval(updateTimer, FLTR.TIMER_INTERVAL);
             FLTR.gamePaused = false;
+
+            if (FLTR.stickyStuck && FLTR.stickyStuckRemaining > 0) {
+                FLTR.stickyStuckStart = Date.now();
+                FLTR.stickyStuckTimer = setTimeout(function () {
+                    FLTR.stickyStuck = false;
+                    FLTR.stickyStuckTimer = null;
+                    FLTR.stickyStuckRemaining = 0;
+                }, FLTR.stickyStuckRemaining);
+            } else if (FLTR.stickyStuck) {
+                FLTR.stickyStuck = false;
+                FLTR.stickyStuckRemaining = 0;
+            }
         }
     } catch (error) {
         console.error('resumeGameEngine error:', error.message);
@@ -1111,6 +1289,13 @@ resetGameState = function () {
         FLTR.gamePaused = false;
         FLTR.powerupActive = false;
         FLTR.currentBallRadius = FLTR.BALL_RADIUS;
+        FLTR.stickyStuck = false;
+        if (FLTR.stickyStuckTimer) {
+            clearTimeout(FLTR.stickyStuckTimer);
+            FLTR.stickyStuckTimer = null;
+        }
+        FLTR.stickyStuckStart = 0;
+        FLTR.stickyStuckRemaining = 0;
         FLTR.resetAllSpecialFood();
     } catch (error) {
         console.error('resetGameState error:', error.message);
@@ -1136,6 +1321,11 @@ endGame = function () {
         clearInterval(timer);
         timer = null;
         FLTR.gameEnded = true;
+        FLTR.stickyStuck = false;
+        if (FLTR.stickyStuckTimer) {
+            clearTimeout(FLTR.stickyStuckTimer);
+            FLTR.stickyStuckTimer = null;
+        }
         saveHighScoreIfNeeded();
     } catch (error) {
         console.error('endGame error:', error.message);

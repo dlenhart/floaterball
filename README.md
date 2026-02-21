@@ -1,8 +1,9 @@
 # Floater Ball
 
-A physics-based collection game where you control a white ball that floats around a canvas with momentum-based movement. Collect as many squares as possible within the time limit while navigating through increasingly challenging levels. Don't eat the red squares!
+A physics-based collection game where you control a white ball that floats around a canvas with momentum-based movement. Collect as many squares as possible within the time 
+limit. Use the walls and other objects to your advantage and get the highest score possible. P.S. don't eat the red squares!
 
-**Version:** 0.3.1  
+**Version:** 0.3.2
 **Author:** Drew D. Lenhart, SnowyWorks  
 **Website:** [snowyworks.com/games](https://snowyworks.com/games)  
 **Source:** [github.com/dlenhart/floaterball](https://github.com/dlenhart/floaterball)
@@ -15,7 +16,7 @@ A physics-based collection game where you control a white ball that floats aroun
 |-----|--------|
 | Arrow Keys | Move the ball |
 | Shift | Brake / stop all movement |
-| Spacebar | Continue to next level (after completing a level) |
+| Spacebar | Continue to next level |
 | P | Pause / resume the game |
 | Esc | Exit to main menu |
 
@@ -23,15 +24,18 @@ A physics-based collection game where you control a white ball that floats aroun
 
 | Item | Points | Details |
 |------|--------|---------|
-| Gray Square | 1 point | Standard collectible, always present |
+| Gray Square | 1 point | Standard food, spawns after each piece collected |
 | Green Square | 5 points | 1–3 spawn randomly per level (Level 2+) |
 | Purple Square | 10 points | Bonus food that appears after 5 seconds (Level 2+) |
 | Orange Square | Power-up | Doubles ball size temporarily (no points) |
 | Red Square | **Game Over!** | Forbidden fruit — appears on even-numbered levels (Level 2+) |
+| Gold Triangle (Sticky Mines) | **Stuck for 5s!** | Freezes your ball for 5 seconds (Level 5+) |
 
 ### Obstacles
 
-Black obstacles start appearing at Level 2. The number increases with each level. Your ball bounces off them — use them strategically!
+Black obstacles start appearing at Level 2, starting at 3 and increasing by 1 each level. Use them strategically!
+
+**Sticky Mines** (gold triangles) appear on even-numbered levels after Level 5. Rolling over one freezes your ball for 5 seconds while the timer keeps counting.
 
 ## Progression
 
@@ -40,23 +44,6 @@ Black obstacles start appearing at Level 2. The number increases with each level
 - Every 3 levels, the time limit decreases by 1 second (minimum 5 seconds)
 - Obstacles increase each level (starting at Level 2: 3 obstacles, +1 per level)
 
-### Win Condition
-
-Complete a level by collecting at least one square before time runs out.
-
-### Lose Conditions
-
-- Run out of time with zero points collected
-- Touch a red square (instant game over)
-
-## Features
-
-- Momentum-based physics
-- Ball trail effect
-- Score pop-ups on collection
-- High score saved locally (localStorage)
-- Auto-pause when switching tabs or losing window focus
-- Wall and obstacle bouncing
 
 ## Install
 

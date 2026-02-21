@@ -24,8 +24,13 @@ body {
     background: var(--deep-black);
     font-family: 'Courier New', monospace;
     color: var(--neon-cyan);
-    overflow: hidden;
+    overflow: auto;
     position: relative;
+}
+
+/* Prevent scrolling on the game page */
+body:has(canvas) {
+    overflow: hidden;
 }
 
 /* Animated grid background */
