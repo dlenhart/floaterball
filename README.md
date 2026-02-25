@@ -3,10 +3,6 @@
 A physics-based collection game where you control a white ball that floats around a grid. Collect as many squares as possible within the time 
 limit. Use the walls and other objects to your advantage and get the highest score possible. P.S. don't eat the red squares!
 
-**Author:** Drew D. Lenhart, SnowyWorks  
-**Website:** [snowyworks.com/games](https://snowyworks.com/games)  
-**Source:** [github.com/dlenhart/floaterball](https://github.com/dlenhart/floaterball)
-
 ## How to Play
 
 ### Controls
@@ -48,9 +44,6 @@ Black obstacles start appearing at Level 2, starting at 3 and increasing by 1 ea
 
 1. Download or clone the repository.
 2. Open `index.html` in a browser.
-
-No build tools or server required.
-
 
 ```
 
