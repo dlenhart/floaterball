@@ -47,9 +47,9 @@
             </div>
 
             <div id="levelTransitionOverlay" class="instructionOverlay" style="display: none;">
-                <h2 style="color: #ffff00; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">LEVEL COMPLETE!</h2>
+                <h2 style="color: #ffff00; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">Level Complete!</h2>
                 <p style="margin-bottom: 30px; font-size: 1.1rem;">
-                    Great job! Ready for the next challenge?
+                    Great job! Get ready for the next level!
                 </p>
                 <p style="color: #ff00ff; font-size: 0.9rem;">
                     Press <span style="display: inline-block; background: #1a1a1a; border: 2px solid #00ffff; padding: 5px 12px; margin: 3px; border-radius: 4px; font-weight: 700; color: #00ffff;">SPACEBAR</span> to continue
@@ -57,26 +57,22 @@
             </div>
 
             <div id="gameOverOverlay" class="instructionOverlay" style="display: none;">
-                <h2 id="gameOverTitle" style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-bottom: 20px;">GAME OVER!</h2>
+                <h2 id="gameOverTitle" style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-bottom: 20px;">Game Over!</h2>
                 <p id="gameOverMessage" style="margin-bottom: 20px; font-size: 1.1rem; color: #00ffff;">
                     Your score was: <span id="finalScore" style="color: #ffff00; font-weight: bold;">0</span>
                 </p>
-                <a href="#" class="playButton" onclick="resetGame(); return false;">PLAY AGAIN</a>
+                <a href="#" class="playButton" onclick="resetGame(); return false;">Play Again</a>
             </div>
 
             <div id="exitConfirmOverlay" class="instructionOverlay" style="display: none;">
-                <h2 style="color: #e1e136; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">EXIT GAME?</h2>
+                <h2 style="color: #e1e136; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">Exit Game?</h2>
                 <p style="margin-bottom: 30px; font-size: 1.1rem; color: #00ffff;">
                     Would you like to exit the game?<br/>
                     Your progress will be lost.
                 </p>
-                <a href="#" class="playButton" onclick="confirmExit(); return false;" style="margin: 0 10px;">YES</a>
-                <a href="#" class="playButton" onclick="cancelExit(); return false;" style="margin: 0 10px;">NO</a>
+                <a href="#" class="playButton" onclick="confirmExit(); return false;" style="margin: 0 10px;">Yes</a>
+                <a href="#" class="playButton" onclick="cancelExit(); return false;" style="margin: 0 10px;">No</a>
             </div>
-        </div>
-
-        <div class="footer">
-            <!-- <a href="https://snowyworks.com/games" target="_blank"><img src="assets/images/snowyworks_lng_logo.png" width="85" height="22" style="padding-top: 4px;" /></a> -->
         </div>
     </div>
     <div id="counter"></div>
