@@ -289,7 +289,15 @@ let FLTR = {
 
         // Prevent food spawning on top of or too close to the ball
         const expandedRadius = FLTR.currentBallRadius + 30;
-        if (FLTR.ballOverlapsRectangle(FLTR.x, FLTR.y, expandedRadius, x, y, width, height)) {
+        if (FLTR.ballOverlapsRectangle(
+            FLTR.x, 
+            FLTR.y, 
+            expandedRadius, 
+            x, 
+            y, 
+            width, 
+            height)
+        ) {
             return false;
         }
 
@@ -499,7 +507,9 @@ let FLTR = {
             FLTR.score++;
             FLTR.levelScoreCount++;
             FLTR.playSound('eatRegular');
-            FLTR.createScorePopup(FLTR.foodXPos + FLTR.FOOD_WIDTH / 2, FLTR.foodYPos, "+1");
+            FLTR.createScorePopup(
+                FLTR.foodXPos + FLTR.FOOD_WIDTH / 2, FLTR.foodYPos, "+1"
+            );
             FLTR.squares.random();
 
             // Spawn powerup in last 12 seconds of level 2+ (only once per level)
