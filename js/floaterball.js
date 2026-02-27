@@ -141,7 +141,7 @@ let FLTR = {
     },
 
     getLevelTime: function (level) {
-        return Math.max(5, FLTR.INITIAL_TIME - Math.floor((level - 1) / 3));
+        return Math.max(8, FLTR.INITIAL_TIME - Math.floor((level - 1) / 3));
     },
 
     getObstacleCount: function (level) {
@@ -152,8 +152,8 @@ let FLTR = {
     },
 
     getStickyMineCount: function (level) {
-        if (level <= 5 || level % 2 !== 0) return 0;
-        return Math.floor((level - 6) / 6) + 2;
+        if (level < 10) return 0;
+        return Math.min(5, Math.floor((level - 10) / 8) + 1);
     },
 
     rectanglesOverlap: function (x1, y1, w1, h1, x2, y2, w2, h2) {
