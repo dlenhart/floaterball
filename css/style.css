@@ -240,6 +240,17 @@ canvas {
     transform: translateY(-2px);
 }
 
+.credits-link,
+.credits-link:visited,
+.credits-link:hover,
+.credits-link:active {
+    color: var(--neon-cyan);
+}
+
+.credits-link:hover {
+    color: var(--neon-yellow);
+}
+
 /* Full-width button variant */
 .playButton-fullWidth {
     display: block;

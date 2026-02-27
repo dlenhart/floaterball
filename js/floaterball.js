@@ -2,8 +2,8 @@
 Title:      Floater Ball
 Author:     Drew D. Lenhart
 Website:    https://github.com/dlenhart/floaterball
-Date:       02-21-2026
-Version:    0.3.2
+Date:       02-27-2026
+Version:    0.3.3
 
 Description:  Collect as many squares as possible within the time 
 limit. Use the walls and other objects to your advantage and get 
@@ -144,7 +144,9 @@ let FLTR = {
 
     getObstacleCount: function (level) {
         if (level < 2) return 0;
-        return 3 + (level - 2);
+        if (level <= 10) return level + 1;
+        if (level <= 25) return 11 + Math.floor((level - 10) / 2);
+        return Math.min(25, 18 + Math.floor((level - 25) / 3));
     },
 
     getStickyMineCount: function (level) {
@@ -281,6 +283,12 @@ let FLTR = {
                     FLTR.FOOD_HEIGHT)) {
                 return false;
             }
+        }
+
+        // Prevent food spawning on top of or too close to the ball
+        const expandedRadius = FLTR.currentBallRadius + 30;
+        if (FLTR.ballOverlapsRectangle(FLTR.x, FLTR.y, expandedRadius, x, y, width, height)) {
+            return false;
         }
 
         return true;
@@ -1324,6 +1332,11 @@ resetGameState = function () {
         FLTR.trail = [];
         FLTR.scorePopups = [];
         FLTR.wallHitCooldown = false;
+        FLTR.left = false;
+        FLTR.right = false;
+        FLTR.up = false;
+        FLTR.down = false;
+        FLTR.space = false;
         FLTR.resetAllSpecialFood();
     } catch (error) {
         console.error('resetGameState error:', error.message);
