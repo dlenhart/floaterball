@@ -21,7 +21,9 @@
                     <a href="#" class="playButton-fullWidth" onclick="showCredits(); return false;">Credits</a>
                     <br /><br /><br />
                     <div class="footer" style="margin-top: 20px;">© 2016-2026 SnowyWorks<br />
-                    <a href="https://snowyworks.com/games" target="_blank"><img src="assets/images/snowyworks_lng_logo.png" width="85" height="22" style="padding-top: 4px;" /></a>
+                        <a href="https://snowyworks.com/games" target="_blank"><img
+                                src="assets/images/snowyworks_lng_logo.png" width="85" height="22"
+                                style="padding-top: 4px;" /></a>
                     </div>
                 </div>
             </div>
@@ -29,7 +31,7 @@
             <div id="instructionOverlay" class="instructionOverlay" style="display: none;">
                 <p style="margin-bottom: 5px; line-height: 0.9; text-align: justify;">
                     Floater Ball: Collect as many squares as possible within the time
-                    limit. Use the walls and other objects to your advantage and get 
+                    limit. Use the walls and other objects to your advantage and get
                     the highest score possible. P.S. don't eat the red squares!
                 </p>
 
@@ -46,18 +48,30 @@
                 <a href="instructions.html" class="playButton">Instructions</a>
             </div>
 
+            <div id="creditsOverlay" class="instructionOverlay" style="display: none;">
+                <h2 style="color: #ffff00; text-shadow: 0 0 10px #ffff00; margin-bottom: 15px;">Credits</h2>
+                <p style="margin-bottom: 20px; font-size: 1.0rem; color: #00ffff;">
+                    Created, designed and developed by <br /><a href="https://www.snowyworks.com/games">Drew D. Lenhart</a><br /><br />
+                    SoundFX by <a href="https://zwubs.com/">Zach Winters</a> 
+                </p>
+                <a href="#" class="playButton" onclick="exitCredits(); return false;">OK</a>
+            </div>
+
             <div id="levelTransitionOverlay" class="instructionOverlay" style="display: none;">
                 <h2 style="color: #ffff00; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">Level Complete!</h2>
                 <p style="margin-bottom: 30px; font-size: 1.1rem;">
                     Great job! Get ready for the next level!
                 </p>
                 <p style="color: #ff00ff; font-size: 0.9rem;">
-                    Press <span style="display: inline-block; background: #1a1a1a; border: 2px solid #00ffff; padding: 5px 12px; margin: 3px; border-radius: 4px; font-weight: 700; color: #00ffff;">SPACEBAR</span> to continue
+                    Press <span
+                        style="display: inline-block; background: #1a1a1a; border: 2px solid #00ffff; padding: 5px 12px; margin: 3px; border-radius: 4px; font-weight: 700; color: #00ffff;">SPACEBAR</span>
+                    to continue
                 </p>
             </div>
 
             <div id="gameOverOverlay" class="instructionOverlay" style="display: none;">
-                <h2 id="gameOverTitle" style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-bottom: 20px;">Game Over!</h2>
+                <h2 id="gameOverTitle" style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-bottom: 20px;">Game
+                    Over!</h2>
                 <p id="gameOverMessage" style="margin-bottom: 20px; font-size: 1.1rem; color: #00ffff;">
                     Your score was: <span id="finalScore" style="color: #ffff00; font-weight: bold;">0</span>
                 </p>
@@ -67,7 +81,7 @@
             <div id="exitConfirmOverlay" class="instructionOverlay" style="display: none;">
                 <h2 style="color: #e1e136; text-shadow: 0 0 10px #ffff00; margin-bottom: 20px;">Exit Game?</h2>
                 <p style="margin-bottom: 30px; font-size: 1.1rem; color: #00ffff;">
-                    Would you like to exit the game?<br/>
+                    Would you like to exit the game?<br />
                     Your progress will be lost.
                 </p>
                 <a href="#" class="playButton" onclick="confirmExit(); return false;" style="margin: 0 10px;">Yes</a>
@@ -96,6 +110,16 @@
         function hideInstructionsAndStart() {
             document.getElementById('instructionOverlay').style.display = 'none';
             startGame();
+        }
+
+        function showCredits() {
+            document.getElementById('startOverlay').style.display = 'none';
+            document.getElementById('creditsOverlay').style.display = 'block';
+        }
+
+        function exitCredits() {
+            document.getElementById('creditsOverlay').style.display = 'none';
+            document.getElementById('startOverlay').style.display = 'block';
         }
 
         function confirmExit() {

@@ -90,6 +90,7 @@ let FLTR = {
     up: false,
     down: false,
     space: false,
+    pause: false,
     gamePaused: false,
     score: 0,
     canvas: null,
@@ -99,6 +100,7 @@ let FLTR = {
     debug: false,
     gameEnded: false,
     highScore: 0,
+    lastFrameTime: 0,
     levelTransition: false,
     levelScoreCount: 0,
     scorePopups: [],
@@ -108,8 +110,6 @@ let FLTR = {
     stickyStuckStart: 0,
     stickyStuckRemaining: 0,
     wallHitCooldown: false,
-    bonusSpawnTimer: null,
-    forbiddenSpawnTimer: null,
 
     sounds: {},
 
@@ -170,6 +170,36 @@ let FLTR = {
             Math.round(FLTR.x) - FLTR.currentBallRadius < foodX + foodWidth &&
             Math.round(FLTR.y) + FLTR.currentBallRadius > foodY &&
             Math.round(FLTR.y) - FLTR.currentBallRadius < foodY + foodHeight;
+    },
+
+    resetFoodPosition: function (type) {
+        switch (type) {
+            case 'bonus':
+                FLTR.bonusFoodActive = false;
+                FLTR.bonusFoodXPos = -100;
+                FLTR.bonusFoodYPos = -100;
+                break;
+            case 'powerup':
+                FLTR.powerupFoodActive = false;
+                FLTR.powerupFoodXPos = -100;
+                FLTR.powerupFoodYPos = -100;
+                break;
+            case 'forbidden':
+                FLTR.forbiddenFoodActive = false;
+                FLTR.forbiddenFoodXPos = -100;
+                FLTR.forbiddenFoodYPos = -100;
+                break;
+        }
+    },
+
+    resetAllSpecialFood: function () {
+        FLTR.resetFoodPosition('bonus');
+        FLTR.resetFoodPosition('powerup');
+        FLTR.resetFoodPosition('forbidden');
+        FLTR.greenFoodItems = [];
+        FLTR.stickyMines = [];
+        FLTR.foodXPos = -100;
+        FLTR.foodYPos = -100;
     },
 
     isPositionValidForFood: function (x, y, width, height, excludeTypes = []) {
@@ -407,8 +437,7 @@ let FLTR = {
 
     spawnTimedSpecialFoods: function () {
         if (FLTR.level >= 2) {
-            FLTR.bonusSpawnTimer = setTimeout(function () {
-                FLTR.bonusSpawnTimer = null;
+            setTimeout(function () {
                 if (!FLTR.gameEnded && FLTR.level >= 2) {
                     FLTR.squares.bonus();
                 }
@@ -416,8 +445,7 @@ let FLTR = {
         }
 
         if (FLTR.level % 2 === 0 && FLTR.level >= 2) {
-            FLTR.forbiddenSpawnTimer = setTimeout(function () {
-                FLTR.forbiddenSpawnTimer = null;
+            setTimeout(function () {
                 if (!FLTR.gameEnded && FLTR.level % 2 === 0) {
                     FLTR.squares.forbidden();
                 }
@@ -527,9 +555,13 @@ let FLTR = {
                 FLTR.FOOD_HEIGHT)) {
             if (FLTR.debug) console.log("Powerup food collision");
 
+            const oldRadius = FLTR.currentBallRadius;
+
             FLTR.powerupActive = true;
             FLTR.playSound('eatOrange');
             FLTR.currentBallRadius = FLTR.BALL_RADIUS * FLTR.POWERUP_SIZE_MULTIPLIER;
+
+            const radiusDiff = FLTR.currentBallRadius - oldRadius;
 
             if (FLTR.y - FLTR.currentBallRadius < FLTR.HEADER_HEIGHT) {
                 FLTR.y = FLTR.HEADER_HEIGHT + FLTR.currentBallRadius;
@@ -615,56 +647,7 @@ let FLTR = {
         }
     },
 
-    resetFoodPosition: function (type) {
-        switch (type) {
-            case 'bonus':
-                FLTR.bonusFoodActive = false;
-                FLTR.bonusFoodXPos = -100;
-                FLTR.bonusFoodYPos = -100;
-                break;
-            case 'powerup':
-                FLTR.powerupFoodActive = false;
-                FLTR.powerupFoodXPos = -100;
-                FLTR.powerupFoodYPos = -100;
-                break;
-            case 'forbidden':
-                FLTR.forbiddenFoodActive = false;
-                FLTR.forbiddenFoodXPos = -100;
-                FLTR.forbiddenFoodYPos = -100;
-                break;
-        }
-    },
-
-    clearSpawnTimers: function () {
-        if (FLTR.bonusSpawnTimer) {
-            clearTimeout(FLTR.bonusSpawnTimer);
-            FLTR.bonusSpawnTimer = null;
-        }
-        if (FLTR.forbiddenSpawnTimer) {
-            clearTimeout(FLTR.forbiddenSpawnTimer);
-            FLTR.forbiddenSpawnTimer = null;
-        }
-    },
-
-    resetAllSpecialFood: function () {
-        FLTR.clearSpawnTimers();
-        FLTR.resetFoodPosition('bonus');
-        FLTR.resetFoodPosition('powerup');
-        FLTR.resetFoodPosition('forbidden');
-        FLTR.greenFoodItems = [];
-        FLTR.stickyMines = [];
-        FLTR.foodXPos = -100;
-        FLTR.foodYPos = -100;
-    },
-
     loadSounds: function () {
-        for (const key of Object.keys(FLTR.sounds)) {
-            const audio = FLTR.sounds[key];
-            audio.pause();
-            audio.src = '';
-        }
-        FLTR.sounds = {};
-
         const soundFiles = {
             eatRegular: 'assets/sfx/eat-regular-food.wav',
             eatGreen: 'assets/sfx/green-fruit.wav',
@@ -760,6 +743,7 @@ let FLTR = {
                 FLTR.obstacles = [];
                 FLTR.resetAllSpecialFood();
 
+                showHideButton("pauseb", "none");
                 FLTR.draw();
             }
         } else if (FLTR.level == FLTR.TOTAL_LEVELS && FLTR.timeLeft <= 0) {
@@ -786,14 +770,13 @@ let FLTR = {
                 clearTimeout(FLTR.stickyStuckTimer);
                 FLTR.stickyStuckTimer = null;
             }
-            FLTR.trail = [];
-            FLTR.scorePopups = [];
-            FLTR.wallHitCooldown = false;
             FLTR.resetAllSpecialFood();
             FLTR.generateObstacles();
             FLTR.squares.random();
 
             FLTR.spawnTimedSpecialFoods();
+
+            showHideButton("pauseb", "block");
 
             FLTR.gamePaused = false;
             game = requestAnimationFrame(FLTR.gameloop);
@@ -869,9 +852,7 @@ let FLTR = {
             });
 
             if (FLTR.stickyStuck) {
-                FLTR.text.centeredText(
-                    'Stuck!', FLTR.x, FLTR.y - FLTR.currentBallRadius - 15, 16, '#FFD700'
-                );
+                FLTR.text.centeredText('Stuck!', FLTR.x, FLTR.y - FLTR.currentBallRadius - 15, 16, '#FFD700');
             }
 
             if (FLTR.forbiddenFoodActive) {
@@ -1228,6 +1209,19 @@ showHideButton = function (id, displayType = "none") {
     }
 }
 
+updateButtonText = function (id, text) {
+    try {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = text;
+        } else {
+            console.warn('Element with id "' + id + '" not found');
+        }
+    } catch (error) {
+        console.error('updateButtonText error:', error.message);
+    }
+}
+
 updateTimer = function () {
     try {
         FLTR.timeLeft = FLTR.timeLeft - 1;
@@ -1321,9 +1315,6 @@ resetGameState = function () {
         }
         FLTR.stickyStuckStart = 0;
         FLTR.stickyStuckRemaining = 0;
-        FLTR.trail = [];
-        FLTR.scorePopups = [];
-        FLTR.wallHitCooldown = false;
         FLTR.resetAllSpecialFood();
     } catch (error) {
         console.error('resetGameState error:', error.message);
@@ -1354,7 +1345,6 @@ endGame = function () {
             clearTimeout(FLTR.stickyStuckTimer);
             FLTR.stickyStuckTimer = null;
         }
-        FLTR.clearSpawnTimers();
         saveHighScoreIfNeeded();
     } catch (error) {
         console.error('endGame error:', error.message);
@@ -1424,6 +1414,8 @@ startGame = function () {
         if (!FLTR.canvas) {
             FLTR.init();
         }
+
+        showHideButton("start");
 
         FLTR.generateObstacles();
         FLTR.squares.random();
