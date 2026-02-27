@@ -20,6 +20,7 @@ let timer = null;
 let FLTR = {
     DAMPING: 0.97,
     SPEED_INCREMENT: 0.5,
+    MAX_SPEED: 8,
     INITIAL_TIME: 20,
     TIMER_INTERVAL: 1000,
     INITIAL_LEVEL: 1,
@@ -76,6 +77,7 @@ let FLTR = {
     powerupFoodXPos: -100,
     powerupFoodYPos: -100,
     powerupFoodActive: false,
+    powerupAlreadySpawned: false,
     powerupActive: false,
     forbiddenFoodXPos: -100,
     forbiddenFoodYPos: -100,
@@ -500,8 +502,9 @@ let FLTR = {
             FLTR.createScorePopup(FLTR.foodXPos + FLTR.FOOD_WIDTH / 2, FLTR.foodYPos, "+1");
             FLTR.squares.random();
 
-            // Spawn powerup in last 12 seconds of level 2+
-            if (FLTR.timeLeft <= 12 && !FLTR.powerupFoodActive && FLTR.level >= 2) {
+            // Spawn powerup in last 12 seconds of level 2+ (only once per level)
+            if (FLTR.timeLeft <= 12 && !FLTR.powerupAlreadySpawned && FLTR.level >= 2) {
+                FLTR.powerupAlreadySpawned = true;
                 FLTR.squares.powerup();
             }
         }
@@ -788,6 +791,7 @@ let FLTR = {
             FLTR.timeLeft = FLTR.getLevelTime(FLTR.level);
             FLTR.levelScoreCount = 0;
             FLTR.powerupActive = false;
+            FLTR.powerupAlreadySpawned = false;
             FLTR.currentBallRadius = FLTR.BALL_RADIUS;
             FLTR.stickyStuck = false;
             if (FLTR.stickyStuckTimer) {
@@ -1004,7 +1008,6 @@ FLTR.squares = {
     },
 
     powerup: function () {
-        if (Math.random() > 0.2) return;
         const pos = FLTR.generateFoodPosition(['powerup']);
         if (pos) {
             FLTR.powerupFoodXPos = pos.x;
@@ -1161,6 +1164,8 @@ FLTR.checkKeys = {
         if (FLTR.down) {
             FLTR.ySpeed += FLTR.SPEED_INCREMENT;
         }
+        FLTR.xSpeed = Math.max(-FLTR.MAX_SPEED, Math.min(FLTR.MAX_SPEED, FLTR.xSpeed));
+        FLTR.ySpeed = Math.max(-FLTR.MAX_SPEED, Math.min(FLTR.MAX_SPEED, FLTR.ySpeed));
     }
 };
 
@@ -1310,7 +1315,7 @@ resetGameState = function () {
     try {
         FLTR.level = FLTR.INITIAL_LEVEL;
         FLTR.score = 0;
-        FLTR.timeLeft = 20;
+        FLTR.timeLeft = FLTR.getLevelTime(FLTR.INITIAL_LEVEL);
         FLTR.gameEnded = false;
         FLTR.levelTransition = false;
         FLTR.levelScoreCount = 0;
@@ -1321,6 +1326,7 @@ resetGameState = function () {
         FLTR.forbiddenFoodDeath = false;
         FLTR.gamePaused = false;
         FLTR.powerupActive = false;
+        FLTR.powerupAlreadySpawned = false;
         FLTR.currentBallRadius = FLTR.BALL_RADIUS;
         FLTR.stickyStuck = false;
         if (FLTR.stickyStuckTimer) {
@@ -1450,7 +1456,6 @@ startGame = function () {
             timer = null;
         }
         timer = setInterval(updateTimer, FLTR.TIMER_INTERVAL);
-        updateTimer();
     } catch (error) {
         console.error('startGame error:', error.message);
     }

@@ -1,4 +1,4 @@
-# Floater Ball
+![Floater Ball](assets/images/floater-ball-logo-dark.png)
 
 A physics-based collection game where you control a white ball that floats around a grid. Collect as many squares as possible within the time 
 limit. Use the walls and other objects to your advantage and get the highest score possible. P.S. don't eat the red squares!
